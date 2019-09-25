@@ -1,3 +1,4 @@
+import Mock from 'mockjs'
 
 const asyncRoutes = [
     {
@@ -159,6 +160,13 @@ const test = [
         ]
     }
 ]
+function refreshData () {
+    const identify = Mock.mock({
+        'identify': /[a-zA-Z0-9]{4}/
+    })
+    return identify
+}
+
 
 const tokens = {
     admin: {
@@ -239,6 +247,18 @@ export default [
             return {
                 code: 20000,
                 data: 'success'
+            }
+        }
+    },
+
+    //usr identify
+    {
+        url: '/user/identify',
+        type: 'get',
+        response: _ => {
+            return {
+                code: 20000,
+                data: refreshData()
             }
         }
     }

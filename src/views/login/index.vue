@@ -8,7 +8,7 @@
              label-position="left">
 
       <div class="title-container">
-        <h3 class="title">Login Form</h3>
+        <h3 class="title">登录</h3>
       </div>
 
       <el-form-item prop="username">
@@ -17,7 +17,7 @@
         </span>
         <el-input ref="username"
                   v-model="loginForm.username"
-                  placeholder="Username"
+                  placeholder="请输入用户名"
                   name="username"
                   type="text"
                   tabindex="1"
@@ -32,14 +32,30 @@
                   ref="password"
                   v-model="loginForm.password"
                   :type="passwordType"
-                  placeholder="Password"
+                  placeholder="请输入密码"
                   name="password"
                   tabindex="2"
-                  auto-complete="on"
-                  @keyup.enter.native="handleLogin" />
+                  auto-complete="on" />
         <span class="show-pwd"
               @click="showPwd">
           <svg-icon :icon-class="passwordType === 'password' ? 'eye' : 'eye-open'" />
+        </span>
+      </el-form-item>
+
+      <el-form-item prop="identify">
+        <span class="svg-container">
+          <svg-icon icon-class="star" />
+        </span>
+        <el-input ref="identify"
+                  v-model="identify"
+                  placeholder="请输入验证码"
+                  name="identify"
+                  tabindex="3"
+                  auto-complete="on"
+                  @keyup.enter.native="handleLogin" />
+        <span @click="refreshCode"
+              class="codeType">
+          <s-identify :identifyCode="identifyCode"></s-identify>
         </span>
       </el-form-item>
 
@@ -49,8 +65,8 @@
                  @click.native.prevent="handleLogin">Login</el-button>
 
       <div class="tips">
-        <span style="margin-right:20px;">username: admin</span>
-        <span> password: any</span>
+        <span style="margin-right:20px;">用户名可选: admin/editor</span>
+        <span> 密码: 随便输入</span>
       </div>
 
     </el-form>
@@ -59,20 +75,32 @@
 
 <script>
 import { validUsername } from '@/utils/validate'
+import SIdentify from '@/components/Identify'
+import { getIdentify } from '@/api/user'
 
 export default {
   name: 'Login',
+  components: {
+    SIdentify
+  },
   data () {
     const validateUsername = (rule, value, callback) => {
       if (!validUsername(value)) {
-        callback(new Error('Please enter the correct user name'))
+        callback(new Error('请输入正确的用户名'))
       } else {
         callback()
       }
     }
     const validatePassword = (rule, value, callback) => {
       if (value.length < 6) {
-        callback(new Error('The password can not be less than 6 digits'))
+        callback(new Error('密码不小于六位'))
+      } else {
+        callback()
+      }
+    }
+    const validateIdentify = (rule, value, callback) => {
+      if (this.identify != this.identifyCode) {
+        callback(new Error('验证码不正确'))
       } else {
         callback()
       }
@@ -84,12 +112,20 @@ export default {
       },
       loginRules: {
         username: [{ required: true, trigger: 'blur', validator: validateUsername }],
-        password: [{ required: true, trigger: 'blur', validator: validatePassword }]
+        password: [{ required: true, trigger: 'blur', validator: validatePassword }],
+        identify: [{ required: true, trigger: 'blur', validator: validateIdentify }]
       },
       loading: false,
       passwordType: 'password',
-      redirect: undefined
+      redirect: undefined,
+      identify: "",
+      identifyCode: ""
     }
+  },
+  mounted () {
+    getIdentify().then(res => {
+      this.identifyCode = res.data.identify
+    })
   },
   watch: {
     $route: {
@@ -123,9 +159,14 @@ export default {
             this.loading = false
           })
         } else {
-          console.log('error submit!!')
+          console.log('帐号/密码 输入错误!')
           return false
         }
+      })
+    },
+    refreshCode () {
+      getIdentify().then(res => {
+        this.identifyCode = res.data.identify
       })
     }
   }
@@ -239,6 +280,13 @@ $light_gray: #eee;
     color: $dark_gray;
     cursor: pointer;
     user-select: none;
+  }
+
+  .codeType {
+    position: absolute;
+    right: 10px;
+    top: 7px;
+    cursor: pointer;
   }
 }
 </style>

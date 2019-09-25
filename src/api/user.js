@@ -22,3 +22,10 @@ export function logout () {
         method: 'post'
     })
 }
+
+export function getIdentify () {
+    return request({
+        url: '/user/identify',
+        method: 'get'
+    })
+}
