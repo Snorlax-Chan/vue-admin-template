@@ -62,7 +62,7 @@
       <el-button :loading="loading"
                  type="primary"
                  style="width:100%;margin-bottom:30px;"
-                 @click.native.prevent="handleLogin">Login</el-button>
+                 @click.native.prevent="handleLogin">登录</el-button>
 
       <div class="tips">
         <span style="margin-right:20px;">用户名可选: admin/editor</span>
@@ -99,7 +99,7 @@ export default {
       }
     }
     const validateIdentify = (rule, value, callback) => {
-      if (this.identify != this.identifyCode) {
+      if (this.identify != this.identifyCode.toLowerCase()) {
         callback(new Error('验证码不正确'))
       } else {
         callback()
@@ -149,17 +149,17 @@ export default {
     handleLogin () {
       this.$refs.loginForm.validate(valid => {
         if (valid) {
-          console.log('验证通过')
+          //   console.log('验证通过')
           this.loading = true
           this.$store.dispatch('user/login', this.loginForm).then(() => {
-            console.log('登录成功')
+            // console.log('登录成功')
             this.$router.push({ path: this.redirect || '/' })
             this.loading = false
           }).catch(() => {
             this.loading = false
           })
         } else {
-          console.log('帐号/密码 输入错误!')
+          //   console.log('帐号/密码 输入错误!')
           return false
         }
       })
