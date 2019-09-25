@@ -42,18 +42,18 @@ const _import = require('@/router/_import_' + process.env.NODE_ENV)//获取组�
 //替代上面的获取路由方法，改为直接从后台遍历得到routers，将其修改为router正确格式
 function filterAsyncRouter (asyncRouterMap) { //遍历后台传来的路由字符串，转换为组件对象
     const accessedRouters = asyncRouterMap.filter(route => {
-        console.log('开始修改compoent' + route.component)
+        // console.log('开始修改compoent' + route.component)
         if (route.component) {
             if (route.component === 'Layout') {//Layout组件特殊处理
                 route.component = Layout
-                console.log('设置layout成功' + route.component)
+                // console.log('设置layout成功' + route.component)
             } else {
                 route.component = _import(route.component)
-                console.log('设置其他component成功' + route.component)
+                // console.log('设置其他component成功' + route.component)
             }
         }
         if (route.children && route.children.length) {
-            console.log('检测到子路由，开始子路由迭代')
+            // console.log('检测到子路由，开始子路由迭代')
             route.children = filterAsyncRouter(route.children)
         }
         return true
@@ -83,7 +83,7 @@ const actions = {
                 accessedRoutes = filterAsyncRouter(routers)
             }
             commit('SET_ROUTES', accessedRoutes)
-            resolve(state.routes)
+            resolve(accessedRoutes)
         })
     }
 }

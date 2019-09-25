@@ -12,7 +12,7 @@ NProgress.configure({ showSpinner: false }) // NProgress Configuration
 const whiteList = ['/login'] // no redirect whitelist
 
 router.beforeEach(async (to, from, next) => {
-    console.log("进入beforeEach")
+    // console.log("调起beforeEach钩子")
     // start progress bar
     NProgress.start()
 
@@ -24,7 +24,7 @@ router.beforeEach(async (to, from, next) => {
 
     if (hasToken) {
         if (to.path === '/login') {
-            console.log('在登录页面，马上要跳转')
+            // console.log('在登录页面，马上要跳转')
             // if is logged in, redirect to the home page
             next({ path: '/' })
             NProgress.done()
@@ -32,22 +32,22 @@ router.beforeEach(async (to, from, next) => {
             // determine whether the user has obtained his permission roles through getInfo
             //从获取roles修改为获取router
             const hasRouters = store.getters.routers && store.getters.routers.length > 0
-            console.log('获取到的路由:' + hasRouters)
+            // console.log('获取到的路由:' + hasRouters)
             if (hasRouters) {
                 next()
             } else {
-                console.log('即将尝试去取routers')
+                // console.log('即将尝试去取routers')
                 try {
                     // get user info
                     // note: roles must be a object array! such as: ['admin'] or ,['developer','editor']
                     //从获取roles改为获取路由信息
-                    console.log('异步取路由信息开始')
+                    // console.log('异步取路由信息开始')
                     const routers = await store.dispatch('user/getInfo')
-                    console.log('读取到路由信息' + routers)
+                    // console.log('读取到路由信息' + routers)
 
                     // generate accessible routes map based on roles
                     const accessRoutes = await store.dispatch('permission/generateRoutes', routers)
-                    console.log(accessRoutes)
+                    // console.log(accessRoutes)
 
                     // dynamically add accessible routes
                     router.addRoutes(accessRoutes)
