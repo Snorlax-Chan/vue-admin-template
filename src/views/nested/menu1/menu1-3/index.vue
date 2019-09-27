@@ -3,3 +3,8 @@
     <el-alert :closable="false" title="menu 1-3" type="success" />
   </div>
 </template>
+<script>
+export default {
+  name: 'Menu13'
+}
+</script>

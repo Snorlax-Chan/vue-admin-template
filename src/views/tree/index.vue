@@ -1,6 +1,10 @@
 <template>
   <div class="app-container">
-    <el-input v-model="filterText" placeholder="Filter keyword" style="margin-bottom:30px;" />
+    <el-input
+      v-model="filterText"
+      placeholder="Filter keyword"
+      style="margin-bottom:30px;"
+    />
 
     <el-tree
       ref="tree2"
@@ -16,7 +20,7 @@
 
 <script>
 export default {
-
+  name: 'Tree',
   data() {
     return {
       filterText: '',
