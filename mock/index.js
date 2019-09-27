@@ -4,10 +4,7 @@ import { param2Obj } from '../src/utils'
 import user from './user'
 import table from './table'
 
-const mocks = [
-  ...user,
-  ...table
-]
+const mocks = [...user, ...table]
 
 // for front mock
 // please use it cautiously, it will redefine XMLHttpRequest,
@@ -46,7 +43,11 @@ export function mockXHR() {
   }
 
   for (const i of mocks) {
-    Mock.mock(new RegExp(i.url), i.type || 'get', XHR2ExpressReqWrap(i.response))
+    Mock.mock(
+      new RegExp(i.url),
+      i.type || 'get',
+      XHR2ExpressReqWrap(i.response)
+    )
   }
 }
 
@@ -56,7 +57,9 @@ const responseFake = (url, type, respond) => {
     url: new RegExp(`/mock${url}`),
     type: type || 'get',
     response(req, res) {
-      res.json(Mock.mock(respond instanceof Function ? respond(req, res) : respond))
+      res.json(
+        Mock.mock(respond instanceof Function ? respond(req, res) : respond)
+      )
     }
   }
 }

@@ -105,7 +105,7 @@ export default {
       }
     }
     const validateIdentify = (rule, value, callback) => {
-      if (this.identify != this.identifyCode.toLowerCase()) {
+      if (this.identify !== this.identifyCode.toLowerCase()) {
         callback(new Error('验证码不正确'))
       } else {
         callback()
@@ -136,7 +136,7 @@ export default {
   },
   watch: {
     $route: {
-      handler: function (route) {
+      handler: function(route) {
         this.redirect = route.query && route.query.redirect
       },
       immediate: true

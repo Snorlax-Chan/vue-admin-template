@@ -1,9 +1,9 @@
-import { constantRoutes } from "@/router"
+import { constantRoutes } from '@/router'
 
-import Layout from "@/layout" // Layout 是架构组件，不在后台返回，在文件里单独引入
-import store from ".."
+import Layout from '@/layout' // Layout 是架构组件，不在后台返回，在文件里单独引入
+import store from '..'
 
-const _import = require("@/router/_import_" + process.env.NODE_ENV) // 获取组件的方法
+const _import = require('@/router/_import_' + process.env.NODE_ENV) // 获取组件的方法
 
 /**
  * Use meta.role to determine if the current user has permission
@@ -45,7 +45,7 @@ function filterAsyncRouter(asyncRouterMap) {
   const accessedRouters = asyncRouterMap.filter(route => {
     // console.log('开始修改compoent' + route.component)
     if (route.component) {
-      if (route.component === "Layout") {
+      if (route.component === 'Layout') {
         // Layout组件特殊处理
         route.component = Layout
         // console.log('设置layout成功' + route.component)
@@ -84,7 +84,7 @@ const actions = {
       if (routers) {
         accessedRoutes = filterAsyncRouter(routers)
       }
-      commit("SET_ROUTES", accessedRoutes)
+      commit('SET_ROUTES', accessedRoutes)
       resolve(accessedRoutes)
     })
   }
