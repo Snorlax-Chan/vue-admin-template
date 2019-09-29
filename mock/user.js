@@ -1,6 +1,6 @@
 import Mock from 'mockjs'
 
-const asyncRoutes1 = [
+const asyncRoutes = [
   {
     path: '/',
     component: 'Layout',
@@ -10,7 +10,7 @@ const asyncRoutes1 = [
         path: 'dashboard',
         name: 'Dashboard',
         component: 'dashboard',
-        meta: { title: 'Dashboard', icon: 'dashboard', affix: true }
+        meta: { title: '首页', icon: 'dashboard', affix: true }
       }
     ]
   },
@@ -35,7 +35,6 @@ const asyncRoutes1 = [
       }
     ]
   },
-
   {
     path: '/form',
     component: 'Layout',
@@ -135,11 +134,26 @@ const test = [
     ]
   }
 ]
+
 function refreshData() {
   const identify = Mock.mock({
     identify: /[a-zA-Z0-9]{4}/
   })
   return identify
+}
+
+function unArr(arr) {
+  var res = {}
+  arr = arr.reduce((item, next) => {
+    res[next.path] ? '' : res[next.path] = true && item.push(next)
+    return item
+  },[])
+  return arr
+}
+
+const router = {
+  admin: asyncRoutes,
+  editor: test
 }
 
 const tokens = {
@@ -153,17 +167,15 @@ const tokens = {
 
 const users = {
   'admin-token': {
-    routers: asyncRoutes1,
+    roles: ['admin'],
     introduction: 'I am a super administrator',
-    avatar:
-      'https://wpimg.wallstcn.com/f778738c-e4f8-4870-b634-56703b4acafe.gif',
+    avatar: 'https://wpimg.wallstcn.com/f778738c-e4f8-4870-b634-56703b4acafe.gif',
     name: 'Super Admin'
   },
   'editor-token': {
-    routers: test,
+    roles: ['editor'],
     introduction: 'I am an editor',
-    avatar:
-      'https://wpimg.wallstcn.com/f778738c-e4f8-4870-b634-56703b4acafe.gif',
+    avatar: 'https://wpimg.wallstcn.com/f778738c-e4f8-4870-b634-56703b4acafe.gif',
     name: 'Normal Editor'
   }
 }
@@ -235,6 +247,38 @@ export default [
       return {
         code: 20000,
         data: refreshData()
+      }
+    }
+  },
+
+  // user router
+  {
+    url: '/user/router',
+    type: 'post',
+    response: config => {
+      const roles = config.body
+      var orignRuter = []
+      if (roles) {
+        for (let i of roles) {
+          orignRuter = orignRuter.concat(router[i])
+        }
+      } else {
+        return {
+          code: 12345,
+          message: 'roles are incorrect.'
+        }
+      }
+
+      const relRouter = unArr(orignRuter)
+      if (!relRouter) {
+        return {
+          code: 123,
+          message: 'router are incorrect.'
+        }
+      }
+      return {
+        code: 20000,
+        data: relRouter
       }
     }
   }

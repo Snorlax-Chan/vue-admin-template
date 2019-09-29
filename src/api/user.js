@@ -7,7 +7,7 @@ export function login(data) {
     data
   })
 }
-// 修改为获取路由信息
+
 export function getInfo(token) {
   return request({
     url: '/user/info',
@@ -27,5 +27,13 @@ export function getIdentify() {
   return request({
     url: '/user/identify',
     method: 'get'
+  })
+}
+
+export function getRouter(roles) {
+  return request({
+    url: '/user/router',
+    method: 'post',
+    data: roles
   })
 }

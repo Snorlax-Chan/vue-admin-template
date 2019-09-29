@@ -29,28 +29,21 @@ router.beforeEach(async(to, from, next) => {
       NProgress.done()
     } else {
       // determine whether the user has obtained his permission roles through getInfo
-      // 从获取roles修改为获取router
-      const hasRouters = store.getters.routers && store.getters.routers.length > 0
-      // console.log('获取到的路由:' + hasRouters)
-      if (hasRouters) {
+      const hasRouter = store.getters.router && store.getters.router.length > 0
+      if (hasRouter) {
         next()
       } else {
-        // console.log('即将尝试去取routers')
         try {
           // get user info
           // note: roles must be a object array! such as: ['admin'] or ,['developer','editor']
-          // 从获取roles改为获取路由信息
           // console.log('异步取路由信息开始')
-          const routers = await store.dispatch('user/getInfo')
-          // console.log('读取到路由信息' + routers)
-
+          const roles = await store.dispatch('user/getInfo')
+          const routers = await store.dispatch('user/getRouter', roles)
           // generate accessible routes map based on roles
           const accessRoutes = await store.dispatch('permission/generateRoutes', routers)
-          // console.log(accessRoutes)
 
           // dynamically add accessible routes
           router.addRoutes(accessRoutes)
-
           // hack method to ensure that addRoutes is complete
           // set the replace: true, so the navigation will not leave a history record
           next({ ...to, replace: true })
