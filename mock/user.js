@@ -1,6 +1,6 @@
 import Mock from 'mockjs'
 
-const asyncRoutes = [
+export const asyncRoutes = [
   {
     path: '/',
     component: 'Layout',
@@ -15,17 +15,17 @@ const asyncRoutes = [
     ]
   },
   {
-    path: '/example',
+    path: '/permission',
     component: 'Layout',
-    redirect: '/example/table',
-    name: 'Example',
-    meta: { title: 'Example', icon: 'example' },
+    redirect: '/permission/role',
+    name: 'Permission',
+    meta: { title: '权限管理', icon: 'password' },
     children: [
       {
-        path: 'table',
-        name: 'Table',
-        component: 'table',
-        meta: { title: 'Table', icon: 'table' }
+        path: 'role',
+        name: 'Role',
+        component: 'role',
+        meta: { title: '角色权限', icon: 'peoples' }
       },
       {
         path: 'tree',
@@ -119,7 +119,7 @@ const asyncRoutes = [
   { path: '*', redirect: '/404', hidden: true }
 ]
 
-const test = [
+export const test = [
   {
     path: '/',
     component: 'Layout',
@@ -143,18 +143,36 @@ function refreshData() {
 }
 
 function unArr(arr) {
-  var res = {}
+  const res = {}
   arr = arr.reduce((item, next) => {
-    res[next.path] ? '' : res[next.path] = true && item.push(next)
+    res[next.path] ? '' : (res[next.path] = true && item.push(next))
     return item
-  },[])
+  }, [])
   return arr
 }
 
-const router = {
-  admin: asyncRoutes,
-  editor: test
+function getRoleName() {
+  const res = []
+  for (let i in roles) {
+    res.push(roles[i].name)
+  }
+  return res
 }
+
+export const roles = [
+  {
+    key: 'admin',
+    name: '超级管理员',
+    description: '我是一个超级管理员，拥有所有权限',
+    routes: asyncRoutes
+  },
+  {
+    key: 'editor',
+    name: '用户',
+    description: '我是一个普通，只有特定权限',
+    routes: test
+  }
+]
 
 const tokens = {
   admin: {
@@ -170,13 +188,15 @@ const users = {
     roles: ['admin'],
     introduction: 'I am a super administrator',
     avatar: 'https://wpimg.wallstcn.com/f778738c-e4f8-4870-b634-56703b4acafe.gif',
-    name: 'Super Admin'
+    name: 'Super Admin',
+    department: 'Super'
   },
   'editor-token': {
     roles: ['editor'],
     introduction: 'I am an editor',
     avatar: 'https://wpimg.wallstcn.com/f778738c-e4f8-4870-b634-56703b4acafe.gif',
-    name: 'Normal Editor'
+    name: 'Normal Editor',
+    department: '人事部'
   }
 }
 
@@ -256,11 +276,11 @@ export default [
     url: '/user/router',
     type: 'post',
     response: config => {
-      const roles = config.body
+      const res = config.body
       var orignRuter = []
-      if (roles) {
-        for (let i of roles) {
-          orignRuter = orignRuter.concat(router[i])
+      if (res) {
+        for (let i in res) {
+          if (roles[i].key === res[i]) orignRuter = orignRuter.concat(roles[i].routes)
         }
       } else {
         return {
@@ -279,6 +299,30 @@ export default [
       return {
         code: 20000,
         data: relRouter
+      }
+    }
+  },
+
+  // user roles
+  {
+    url: '/user/roleName',
+    type: 'get',
+    response: _ => {
+      return {
+        code: 20000,
+        data: getRoleName()
+      }
+    }
+  },
+
+  // user all
+  {
+    url: '/allUser',
+    type: 'get',
+    response: _ => {
+      return {
+        code: 20000,
+        data: users
       }
     }
   }

@@ -37,3 +37,17 @@ export function getRouter(roles) {
     data: roles
   })
 }
+
+export function getRoleName() {
+  return request({
+    url: '/user/roleName',
+    method: 'get'
+  })
+}
+
+export function getAllUser() {
+  return request({
+    url: '/allUser',
+    method: 'get'
+  })
+}
