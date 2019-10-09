@@ -3,13 +3,12 @@
     <el-button type="primary" @click="handleAddRole">新建角色</el-button>
 
     <el-table :data="rolesList" style="width: 100%;margin-top:30px;" border>
-      <el-table-column align="center" label="角色键" width="220">
-        <template slot-scope="scope">{{ scope.row.key }}</template>
+      <el-table-column align="center" label="ID" width="100" type="index" :index="1">
       </el-table-column>
       <el-table-column align="center" label="角色名" width="220">
         <template slot-scope="scope">{{ scope.row.name }}</template>
       </el-table-column>
-      <el-table-column align="header-center" label="角色描述">
+      <el-table-column align="header-center" label="角色描述" width="220" :show-overflow-tooltip="true">
         <template slot-scope="scope">{{ scope.row.description }}</template>
       </el-table-column>
       <el-table-column align="center" label="操作">

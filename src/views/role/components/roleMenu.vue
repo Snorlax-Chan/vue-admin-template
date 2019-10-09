@@ -1,8 +1,6 @@
 <template>
-  <div>
-    <el-row style="max-height: 80vh;min-height: 80vh;overflow:hidden;">
-      <el-col>
-        <el-scrollbar wrap-class="scrollbar-wrapper">
+  <div style="height: 80vh;">
+        <el-scrollbar wrap-class="scrollbar-wrapper" style="height:100%">
           <el-menu :default-active="activeIndex">
             <el-menu-item index="1">全部用户</el-menu-item>
             <el-menu-item-group title="角色分类">
@@ -10,8 +8,6 @@
             </el-menu-item-group>
           </el-menu>
         </el-scrollbar>
-      </el-col>
-    </el-row>
   </div>
 </template>
 
@@ -35,4 +31,7 @@ export default {
 </script>
 
 <style>
+.scrollbar-wrapper {
+  overflow-x: hidden;
+}
 </style>

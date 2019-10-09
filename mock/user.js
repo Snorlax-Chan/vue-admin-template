@@ -171,6 +171,54 @@ export const roles = [
     name: '用户',
     description: '我是一个普通，只有特定权限',
     routes: test
+  },
+  {
+    key: 'admin',
+    name: '超级管理员',
+    description: '我是一个超级管理员，拥有所有权限',
+    routes: asyncRoutes
+  },
+  {
+    key: 'editor',
+    name: '用户',
+    description: '我是一个普通，只有特定权限',
+    routes: test
+  },
+  {
+    key: 'admin',
+    name: '超级管理员',
+    description: '我是一个超级管理员，拥有所有权限',
+    routes: asyncRoutes
+  },
+  {
+    key: 'editor',
+    name: '用户',
+    description: '我是一个普通，只有特定权限',
+    routes: test
+  },
+  {
+    key: 'admin',
+    name: '超级管理员',
+    description: '我是一个超级管理员，拥有所有权限',
+    routes: asyncRoutes
+  },
+  {
+    key: 'editor',
+    name: '用户',
+    description: '我是一个普通，只有特定权限',
+    routes: test
+  },
+  {
+    key: 'admin',
+    name: '超级管理员',
+    description: '我是一个超级管理员，拥有所有权限',
+    routes: asyncRoutes
+  },
+  {
+    key: 'editor',
+    name: '用户',
+    description: '我是一个普通，只有特定权限',
+    routes: test
   }
 ]
 
