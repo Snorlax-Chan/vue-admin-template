@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import Mock from 'mockjs'
 
 export const asyncRoutes = [
@@ -61,45 +62,12 @@ export const asyncRoutes = [
         path: 'menu1',
         component: 'nested/menu1',
         name: 'Menu1',
-        meta: { title: 'Menu1' },
-        children: [
-          {
-            path: 'menu1-1',
-            component: 'nested/menu1/menu1-1',
-            name: 'Menu1-1',
-            meta: { title: 'Menu1-1' }
-          },
-          {
-            path: 'menu1-2',
-            component: 'nested/menu1/menu1-2',
-            name: 'Menu1-2',
-            meta: { title: 'Menu1-2' },
-            children: [
-              {
-                path: 'menu1-2-1',
-                component: 'nested/menu1/menu1-2/menu1-2-1',
-                name: 'Menu1-2-1',
-                meta: { title: 'Menu1-2-1' }
-              },
-              {
-                path: 'menu1-2-2',
-                component: 'nested/menu1/menu1-2/menu1-2-2',
-                name: 'Menu1-2-2',
-                meta: { title: 'Menu1-2-2' }
-              }
-            ]
-          },
-          {
-            path: 'menu1-3',
-            component: 'nested/menu1/menu1-3',
-            name: 'Menu1-3',
-            meta: { title: 'Menu1-3' }
-          }
-        ]
+        meta: { title: 'Menu1' }
       },
       {
         path: 'menu2',
         component: 'nested/menu2',
+        name: 'Menu2',
         meta: { title: 'menu2' }
       }
     ]
@@ -111,6 +79,7 @@ export const asyncRoutes = [
     children: [
       {
         path: 'https://panjiachen.github.io/vue-element-admin-site/#/',
+        name: 'External',
         meta: { title: ' External Link', icon: 'link' }
       }
     ]
@@ -153,7 +122,7 @@ function unArr(arr) {
 
 function getRoleName() {
   const res = []
-  for (let i in roles) {
+  for (const i in roles) {
     res.push(roles[i].name)
   }
   return res
@@ -327,7 +296,8 @@ export default [
       const res = config.body
       var orignRuter = []
       if (res) {
-        for (let i in res) {
+        // eslint-disable-next-line no-unused-vars
+        for (const i in res) {
           if (roles[i].key === res[i]) orignRuter = orignRuter.concat(roles[i].routes)
         }
       } else {

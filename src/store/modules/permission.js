@@ -1,7 +1,7 @@
 import { constantRoutes } from '@/router'
 
 import Layout from '@/layout' // Layout 是架构组件，不在后台返回，在文件里单独引入
-import store from '..'
+// import store from '..'
 
 const _import = require('@/router/_import_' + process.env.NODE_ENV) // 获取组件的方法
 

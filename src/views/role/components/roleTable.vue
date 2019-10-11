@@ -53,6 +53,7 @@ export default {
   created() {
     const tableData = []
     getAllUser().then(res => {
+      // eslint-disable-next-line no-unused-vars
       for (const key in res.data) {
         tableData.push(res.data[key])
       }

@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import Mock from 'mockjs'
 import { param2Obj } from '../src/utils'
 

@@ -99,6 +99,7 @@ export default {
     },
     initTags() {
       const affixTags = (this.affixTags = this.filterAffixTags(this.routes))
+      // eslint-disable-next-line no-unused-vars
       for (const tag of affixTags) {
         // Must have tag name
         if (tag.name) {
@@ -116,6 +117,7 @@ export default {
     moveToCurrentTag() {
       const tags = this.$refs.tag
       this.$nextTick(() => {
+        // eslint-disable-next-line no-unused-vars
         for (const tag of tags) {
           if (tag.to.path === this.$route.path) {
             this.$refs.scrollPane.moveToTarget(tag)

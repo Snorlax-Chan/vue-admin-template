@@ -3,8 +3,7 @@
     <el-button type="primary" @click="handleAddRole">新建角色</el-button>
 
     <el-table :data="rolesList" style="width: 100%;margin-top:30px;" border>
-      <el-table-column align="center" label="ID" width="100" type="index" :index="1">
-      </el-table-column>
+      <el-table-column align="center" label="ID" width="100" type="index" :index="1" />
       <el-table-column align="center" label="角色名" width="220">
         <template slot-scope="scope">{{ scope.row.name }}</template>
       </el-table-column>
@@ -19,12 +18,12 @@
       </el-table-column>
     </el-table>
 
-    <el-dialog :visible.sync="dialogVisible" :title="dialogType==='edit'?'Edit Role':'New Role'">
+    <el-dialog :visible.sync="dialogVisible" :title="dialogType==='edit'?'编辑角色':'新建角色'">
       <el-form :model="role" label-width="80px" label-position="left">
-        <el-form-item label="Name">
+        <el-form-item label="姓名">
           <el-input v-model="role.name" placeholder="Role Name" />
         </el-form-item>
-        <el-form-item label="Desc">
+        <el-form-item label="描述">
           <el-input
             v-model="role.description"
             :autosize="{ minRows: 2, maxRows: 4}"
@@ -32,21 +31,14 @@
             placeholder="Role Description"
           />
         </el-form-item>
-        <el-form-item label="Menus">
-          <el-tree
-            ref="tree"
-            :check-strictly="checkStrictly"
-            :data="routesData"
-            :props="defaultProps"
-            show-checkbox
-            node-key="path"
-            class="permission-tree"
-          />
+        <el-form-item label="组件列表">
+
+          <tree-table :routes="selected" :checked-route="checkedRoute" />
         </el-form-item>
       </el-form>
       <div style="text-align:right;">
-        <el-button type="danger" @click="dialogVisible=false">Cancel</el-button>
-        <el-button type="primary" @click="confirmRole">Confirm</el-button>
+        <el-button type="danger" @click="dialogVisible=false">取消</el-button>
+        <el-button type="primary" @click="confirmRole">确定</el-button>
       </div>
     </el-dialog>
   </div>
@@ -55,7 +47,14 @@
 <script>
 import path from 'path'
 import { deepClone } from '@/utils'
-import { getRoutes, getRoles, addRole, deleteRole, updateRole } from '@/api/role'
+import {
+  getRoutes,
+  getRoles,
+  addRole,
+  deleteRole,
+  updateRole
+} from '@/api/role'
+import TreeTable from './treeTable'
 
 const defaultRole = {
   key: '',
@@ -66,6 +65,9 @@ const defaultRole = {
 
 export default {
   name: 'RolePermission',
+  components: {
+    TreeTable
+  },
   data() {
     return {
       role: Object.assign({}, defaultRole),
@@ -77,7 +79,9 @@ export default {
       defaultProps: {
         children: 'children',
         label: 'title'
-      }
+      },
+      selected: [],
+      checkedRoute: []
     }
   },
   computed: {
@@ -91,6 +95,37 @@ export default {
     this.getRoles()
   },
   methods: {
+    getchecked(routes, selected) {
+      const checkedRoute = []
+      routes.forEach(route => {
+        // eslint-disable-next-line no-unused-vars
+        for (const i of selected) {
+          if (route.path === i.path) {
+            if (i.children) {
+              if (i.children.length === route.children.length) {
+                checkedRoute.push(i.name)
+                route.checkAll = true
+                route.isIndeterminate = false
+              } else {
+                route.checkAll = false
+                route.isIndeterminate = true
+              }
+              const res = []
+              i.children.forEach(item => {
+                res.push(item.title)
+              })
+              console.log(res)
+              route.checked = res
+            } else {
+              checkedRoute.push(i.name)
+            }
+          }
+        }
+      })
+      console.log(checkedRoute)
+      this.checkedRoute = checkedRoute
+      return routes
+    },
     async getRoutes() {
       const res = await getRoutes()
       this.serviceRoutes = res.data
@@ -105,9 +140,12 @@ export default {
     generateRoutes(routes, basePath = '/') {
       const res = []
 
+      // eslint-disable-next-line no-unused-vars
       for (let route of routes) {
         // skip some route
-        if (route.hidden) { continue }
+        if (route.hidden) {
+          continue
+        }
 
         const onlyOneShowingChild = this.onlyOneShowingChild(route.children, route)
 
@@ -117,8 +155,8 @@ export default {
 
         const data = {
           path: path.resolve(basePath, route.path),
-          title: route.meta && route.meta.title
-
+          title: route.meta && route.meta.title,
+          name: route.name
         }
 
         // recursive child routes
@@ -157,7 +195,10 @@ export default {
       this.role = deepClone(scope.row)
       this.$nextTick(() => {
         const routes = this.generateRoutes(this.role.routes)
-        this.$refs.tree.setCheckedNodes(this.generateArr(routes))
+        console.log('原数据' + routes)
+        // this.$refs.tree.setCheckedNodes(this.generateArr(routes))
+        this.selected = this.getchecked(routes, this.generateArr(routes))
+        console.log('处理后' + this.selected)
         // set checked state of a node not affects its father and child nodes
         this.checkStrictly = false
       })
@@ -176,20 +217,30 @@ export default {
             message: 'Delete succed!'
           })
         })
-        .catch(err => { console.error(err) })
+        .catch(err => {
+          console.error(err)
+        })
     },
     generateTree(routes, basePath = '/', checkedKeys) {
       const res = []
 
+      // eslint-disable-next-line no-unused-vars
       for (const route of routes) {
         const routePath = path.resolve(basePath, route.path)
 
         // recursive child routes
         if (route.children) {
-          route.children = this.generateTree(route.children, routePath, checkedKeys)
+          route.children = this.generateTree(
+            route.children,
+            routePath,
+            checkedKeys
+          )
         }
 
-        if (checkedKeys.includes(routePath) || (route.children && route.children.length >= 1)) {
+        if (
+          checkedKeys.includes(routePath) ||
+          (route.children && route.children.length >= 1)
+        ) {
           res.push(route)
         }
       }
@@ -200,7 +251,6 @@ export default {
 
       const checkedKeys = this.$refs.tree.getCheckedKeys()
       this.role.routes = this.generateTree(deepClone(this.serviceRoutes), '/', checkedKeys)
-
       if (isEdit) {
         await updateRole(this.role.key, this.role)
         for (let index = 0; index < this.rolesList.length; index++) {

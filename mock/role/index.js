@@ -1,5 +1,5 @@
 import Mock from 'mockjs'
-import {roles, asyncRoutes} from '../user'
+import { roles, asyncRoutes } from '../user'
 
 export default [
   // mock get all routes form server
