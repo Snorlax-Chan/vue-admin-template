@@ -5,20 +5,13 @@
     :row-class-name="getRowClass"
     :data="routes"
     row-id="name"
-    :select-config="{checkRowKeys: checkedRoute}"
+    :select-config="{checkRowKeys: checkedRoutes}"
     @select-change="selectChangeEvent"
   >
     <vxe-table-column type="selection" title="全选" width="80" tree-node />
     <vxe-table-column field="title" title="列表" tree-node />
     <vxe-table-column type="expand" width="60">
       <template v-slot="{ row, rowIndex }">
-        <el-checkbox
-          v-if="row.children"
-          v-model="row.checkAll"
-          :indeterminate="row.isIndeterminate"
-          @change="handleCheckAllChange(rowIndex)"
-        >全选</el-checkbox>
-        <div style="margin: 15px 0;" />
         <el-checkbox-group v-model="row.checked" @change="handleCheckedChange(rowIndex)">
           <el-checkbox
             v-for="item in row.children"
@@ -52,18 +45,21 @@ export default {
     return {
     }
   },
-  mounted() {
+  computed: {
+    checkedRoutes() {
+      return this.checkedRoute
+    }
   },
   methods: {
-    selectChangeEvent({ rowIndex }) {
+    selectChangeEvent({ rowIndex, checked }) {
       if (this.routes[rowIndex].children) {
-        this.routes[rowIndex].checkAll = !this.routes[rowIndex].checkAll
+        this.routes[rowIndex].checkAll = checked
         this.handleCheckAllChange(rowIndex)
       }
     },
     getRowClass({ row, index }) {
       const res = []
-      if (!row.children) { // 即改行没有子元素时，添加row-expand-cover类
+      if (!row.children) { // 即该行没有子元素时，添加row-expand-cover类
         res.push('row-expand-cover')
       }
       return res
@@ -94,6 +90,16 @@ export default {
       })
       const checkedCount = this.routes[value].checked.length
       this.routes.checkAll = checkedCount === route.length
+      if (!this.routes.checkAll) {
+        this.checkedRoute = this.checkedRoute.filter(item => {
+          if (item !== this.routes[value].name) {
+            console.log(this.routes[value].name)
+            console.log('未删除' + item)
+            return item
+          }
+        })
+        console.log('选中id为' + this.checkedRoute)
+      }
       console.log(this.checkAll)
       this.isIndeterminate = checkedCount > 0 && checkedCount < route.length
     }

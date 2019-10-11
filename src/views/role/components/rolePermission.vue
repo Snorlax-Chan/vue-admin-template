@@ -32,8 +32,32 @@
           />
         </el-form-item>
         <el-form-item label="组件列表">
-
-          <tree-table :routes="selected" :checked-route="checkedRoute" />
+          <vxe-table
+            ref="treetable"
+            resizable
+            :row-class-name="getRowClass"
+            :data="selected"
+            row-id="name"
+            :select-config="{checkRowKeys: checkedRoute}"
+            @select-change="selectChangeEvent"
+          >
+            <vxe-table-column type="selection" title="全选" width="80" tree-node />
+            <vxe-table-column field="title" title="列表" tree-node />
+            <vxe-table-column type="expand" width="60">
+              <template v-slot="{ row, rowIndex }">
+                <el-checkbox-group
+                  v-model="row.checked"
+                  @change="handleCheckedChange(rowIndex,row)"
+                >
+                  <el-checkbox
+                    v-for="item in row.children"
+                    :key="item.path"
+                    :label="item.title"
+                  >{{ item.title }}</el-checkbox>
+                </el-checkbox-group>
+              </template>
+            </vxe-table-column>
+          </vxe-table>
         </el-form-item>
       </el-form>
       <div style="text-align:right;">
@@ -54,7 +78,6 @@ import {
   deleteRole,
   updateRole
 } from '@/api/role'
-import TreeTable from './treeTable'
 
 const defaultRole = {
   key: '',
@@ -65,9 +88,6 @@ const defaultRole = {
 
 export default {
   name: 'RolePermission',
-  components: {
-    TreeTable
-  },
   data() {
     return {
       role: Object.assign({}, defaultRole),
@@ -87,6 +107,9 @@ export default {
   computed: {
     routesData() {
       return this.routes
+    },
+    checkedRoutes() {
+      return this.checkedRoute
     }
   },
   created() {
@@ -95,6 +118,88 @@ export default {
     this.getRoles()
   },
   methods: {
+    handleCheckAllChange(val) {
+      // route = this.selected[val].children.filter(item => {
+      //   const res = {}
+      //   for(const i in route)
+      //   return res
+      // })
+      console.log(val)
+      const route = []
+      this.selected[val].children.filter(item => {
+        route.push(item.title)
+      })
+      this.selected[val].checked = this.selected[val].checkAll ? route : []
+      this.isIndeterminate = false
+      // if (!this.routes[val].checked) {
+      //   this.checkedRoute = this.checkedRoutes.filter(item => {
+      //     return item !== this.routes[val].title
+      //   })
+      // }
+    },
+    handleCheckedChange(value, row) {
+      console.log(this.selected[value].checked)
+      this.$nextTick(() => {
+        const route = []
+        this.selected[value].children.filter(item => {
+          route.push(item.title)
+        })
+        const checkedCount = this.selected[value].checked.length
+        this.selected.checkAll = checkedCount === route.length
+        if (!this.selected.checkAll) {
+          this.checkedRoute = this.checkedRoute.filter(item => {
+            if (item !== this.selected[value].name) {
+              console.log(this.selected[value].name)
+              console.log('未删除' + item)
+              return item
+            }
+          })
+          console.log('选中id为' + this.checkedRoute)
+          this.$refs.treetable.setSelection(row, false)
+        } else {
+          this.checkedRoute.push(this.selected[value].name)
+          console.log('选中id为' + this.checkedRoute)
+          this.$refs.treetable.setSelection(row, true)
+        }
+        this.isIndeterminate = checkedCount > 0 && checkedCount < route.length
+      })
+    },
+    getRowClass({ row, index }) {
+      const res = []
+      if (!row.children) { // 即该行没有子元素时，添加row-expand-cover类
+        res.push('row-expand-cover')
+      }
+      return res
+    },
+    selectChangeEvent({ rowIndex, checked }) {
+      if (this.selected[rowIndex].children) {
+        this.selected[rowIndex].checkAll = checked
+        this.handleCheckAllChange(rowIndex)
+        if (checked) {
+          this.checkedRoute.push(this.selected[rowIndex].name)
+          console.log(this.checkedRoute)
+        } else {
+          this.checkedRoute = this.checkedRoute.filter(item => {
+            if (item !== this.selected[rowIndex].name) {
+              return item
+            }
+          })
+          console.log(this.checkedRoute)
+        }
+      } else {
+        if (checked) {
+          this.checkedRoute.push(this.selected[rowIndex].name)
+          console.log(this.checkedRoute)
+        } else {
+          this.checkedRoute = this.checkedRoute.filter(item => {
+            if (item !== this.selected[rowIndex].name) {
+              return item
+            }
+          })
+          console.log(this.checkedRoute)
+        }
+      }
+    },
     getchecked(routes, selected) {
       const checkedRoute = []
       routes.forEach(route => {
@@ -182,9 +287,7 @@ export default {
     },
     handleAddRole() {
       this.role = Object.assign({}, defaultRole)
-      if (this.$refs.tree) {
-        this.$refs.tree.setCheckedNodes([])
-      }
+      this.selected = this.routes
       this.dialogType = 'new'
       this.dialogVisible = true
     },
@@ -197,7 +300,7 @@ export default {
         const routes = this.generateRoutes(this.role.routes)
         console.log('原数据' + routes)
         // this.$refs.tree.setCheckedNodes(this.generateArr(routes))
-        this.selected = this.getchecked(routes, this.generateArr(routes))
+        this.selected = this.getchecked(this.routes, this.generateArr(routes))
         console.log('处理后' + this.selected)
         // set checked state of a node not affects its father and child nodes
         this.checkStrictly = false
@@ -310,5 +413,10 @@ export default {
   .permission-tree {
     margin-bottom: 30px;
   }
+}
+</style>
+<style>
+.row-expand-cover .vxe-table--expanded {
+  visibility: hidden;
 }
 </style>
