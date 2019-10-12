@@ -36,10 +36,11 @@
             ref="treetable"
             resizable
             :row-class-name="getRowClass"
-            :data="selected"
+            :data="routesData"
             row-id="name"
             :select-config="{checkRowKeys: checkedRoute}"
             @select-change="selectChangeEvent"
+            @select-all="selectAllEvent"
           >
             <vxe-table-column type="selection" title="全选" width="80" tree-node />
             <vxe-table-column field="title" title="列表" tree-node />
@@ -52,7 +53,7 @@
                   <el-checkbox
                     v-for="item in row.children"
                     :key="item.path"
-                    :label="item.title"
+                    :label="item.name"
                   >{{ item.title }}</el-checkbox>
                 </el-checkbox-group>
               </template>
@@ -106,10 +107,7 @@ export default {
   },
   computed: {
     routesData() {
-      return this.routes
-    },
-    checkedRoutes() {
-      return this.checkedRoute
+      return this.selected
     }
   },
   created() {
@@ -118,16 +116,38 @@ export default {
     this.getRoles()
   },
   methods: {
+    selectAllEvent({ selection, checked }) {
+      if (checked) {
+        const res = []
+        // eslint-disable-next-line no-unused-vars
+        for (const item in selection) {
+          if (selection[item].children) {
+            this.selected[item].checkAll = checked
+            this.handleCheckAllChange(item)
+          }
+          res.push(selection[item].name)
+        }
+        this.checkedRoute = res
+      } else {
+        this.checkedRoute = []
+        // eslint-disable-next-line no-unused-vars
+        for (const item in this.selected) {
+          if (this.selected[item].children) {
+            this.selected[item].checkAll = checked
+            this.handleCheckAllChange(item)
+          }
+        }
+      }
+    },
     handleCheckAllChange(val) {
       // route = this.selected[val].children.filter(item => {
       //   const res = {}
       //   for(const i in route)
       //   return res
       // })
-      console.log(val)
       const route = []
       this.selected[val].children.filter(item => {
-        route.push(item.title)
+        route.push(item.name)
       })
       this.selected[val].checked = this.selected[val].checkAll ? route : []
       this.isIndeterminate = false
@@ -138,27 +158,22 @@ export default {
       // }
     },
     handleCheckedChange(value, row) {
-      console.log(this.selected[value].checked)
       this.$nextTick(() => {
         const route = []
         this.selected[value].children.filter(item => {
-          route.push(item.title)
+          route.push(item.name)
         })
         const checkedCount = this.selected[value].checked.length
-        this.selected.checkAll = checkedCount === route.length
-        if (!this.selected.checkAll) {
+        this.selected[value].checkAll = checkedCount === route.length
+        if (!this.selected[value].checkAll) {
           this.checkedRoute = this.checkedRoute.filter(item => {
             if (item !== this.selected[value].name) {
-              console.log(this.selected[value].name)
-              console.log('未删除' + item)
               return item
             }
           })
-          console.log('选中id为' + this.checkedRoute)
           this.$refs.treetable.setSelection(row, false)
         } else {
           this.checkedRoute.push(this.selected[value].name)
-          console.log('选中id为' + this.checkedRoute)
           this.$refs.treetable.setSelection(row, true)
         }
         this.isIndeterminate = checkedCount > 0 && checkedCount < route.length
@@ -177,26 +192,22 @@ export default {
         this.handleCheckAllChange(rowIndex)
         if (checked) {
           this.checkedRoute.push(this.selected[rowIndex].name)
-          console.log(this.checkedRoute)
         } else {
           this.checkedRoute = this.checkedRoute.filter(item => {
             if (item !== this.selected[rowIndex].name) {
               return item
             }
           })
-          console.log(this.checkedRoute)
         }
       } else {
         if (checked) {
           this.checkedRoute.push(this.selected[rowIndex].name)
-          console.log(this.checkedRoute)
         } else {
           this.checkedRoute = this.checkedRoute.filter(item => {
             if (item !== this.selected[rowIndex].name) {
               return item
             }
           })
-          console.log(this.checkedRoute)
         }
       }
     },
@@ -217,9 +228,8 @@ export default {
               }
               const res = []
               i.children.forEach(item => {
-                res.push(item.title)
+                res.push(item.name)
               })
-              console.log(res)
               route.checked = res
             } else {
               checkedRoute.push(i.name)
@@ -227,9 +237,23 @@ export default {
           }
         }
       })
-      console.log(checkedRoute)
       this.checkedRoute = checkedRoute
       return routes
+    },
+    getcheckedArr(routes) {
+      let res = []
+      // eslint-disable-next-line no-unused-vars
+      for (const route of routes) {
+        if (route.checked) {
+          res = res.concat(route.checked)
+        }
+        // 若要修改为无限路由可能需要此步
+        if (route.children) {
+          res = res.concat(this.getcheckedArr(route.children))
+        }
+      }
+
+      return res
     },
     async getRoutes() {
       const res = await getRoutes()
@@ -286,22 +310,31 @@ export default {
       return data
     },
     handleAddRole() {
-      this.role = Object.assign({}, defaultRole)
-      this.selected = this.routes
-      this.dialogType = 'new'
-      this.dialogVisible = true
+      this.$nextTick(() => {
+        this.role = Object.assign({}, defaultRole)
+        this.selected = []
+        this.checkedRoute = []
+        this.selected = this.routes
+        if (this.$refs.treetable) {
+          console.log('重载了吗' + this.selected === this.routes)
+          this.$refs.treetable.reloadData(this.routes)
+        }
+        this.dialogType = 'new'
+        this.dialogVisible = true
+      })
     },
     handleEdit(scope) {
       this.dialogType = 'edit'
       this.dialogVisible = true
       this.checkStrictly = true
-      this.role = deepClone(scope.row)
+      this.selected = []
+      this.checkedRoute = []
       this.$nextTick(() => {
+        this.role = deepClone(scope.row)
         const routes = this.generateRoutes(this.role.routes)
-        console.log('原数据' + routes)
         // this.$refs.tree.setCheckedNodes(this.generateArr(routes))
         this.selected = this.getchecked(this.routes, this.generateArr(routes))
-        console.log('处理后' + this.selected)
+        this.$refs.treetable.reloadData(this.getchecked(this.routes, this.generateArr(routes)))
         // set checked state of a node not affects its father and child nodes
         this.checkStrictly = false
       })
@@ -324,24 +357,23 @@ export default {
           console.error(err)
         })
     },
-    generateTree(routes, basePath = '/', checkedKeys) {
+    generateTree(routes, checkedKeys) {
       const res = []
 
       // eslint-disable-next-line no-unused-vars
       for (const route of routes) {
-        const routePath = path.resolve(basePath, route.path)
+        const routeName = route.name
 
         // recursive child routes
         if (route.children) {
           route.children = this.generateTree(
             route.children,
-            routePath,
             checkedKeys
           )
         }
 
         if (
-          checkedKeys.includes(routePath) ||
+          checkedKeys.includes(routeName) ||
           (route.children && route.children.length >= 1)
         ) {
           res.push(route)
@@ -351,9 +383,9 @@ export default {
     },
     async confirmRole() {
       const isEdit = this.dialogType === 'edit'
-
-      const checkedKeys = this.$refs.tree.getCheckedKeys()
-      this.role.routes = this.generateTree(deepClone(this.serviceRoutes), '/', checkedKeys)
+      const checkedNames = this.checkedRoute.concat(this.getcheckedArr(this.selected))
+      // const checkedKeys = this.$refs.tree.getCheckedKeys()
+      this.role.routes = this.generateTree(deepClone(this.serviceRoutes), checkedNames)
       if (isEdit) {
         await updateRole(this.role.key, this.role)
         for (let index = 0; index < this.rolesList.length; index++) {
@@ -363,6 +395,7 @@ export default {
           }
         }
       } else {
+        console.log(this.role)
         const { data } = await addRole(this.role)
         this.role.key = data.key
         this.rolesList.push(this.role)
