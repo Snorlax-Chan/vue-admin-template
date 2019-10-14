@@ -259,6 +259,7 @@ export default {
       const res = await getRoutes()
       this.serviceRoutes = res.data
       this.routes = this.generateRoutes(res.data)
+      this.realRoutes = this.generateRoutes(res.data)
     },
     async getRoles() {
       const res = await getRoles()
@@ -314,9 +315,11 @@ export default {
         this.role = Object.assign({}, defaultRole)
         this.selected = []
         this.checkedRoute = []
-        this.selected = this.routes
+        // 此处必须用deepclone
+        // 原因js传参（若参数为引用类型时，即数组对象等，会复制一份该引用的地址）
+        // 所以在修改参数传入的引用类型对象时，若对该对象进行修改，因为该对象在内存中的地址相同，修改会同步
+        this.selected = deepClone(this.routes)
         if (this.$refs.treetable) {
-          console.log('重载了吗' + this.selected === this.routes)
           this.$refs.treetable.reloadData(this.routes)
         }
         this.dialogType = 'new'
@@ -332,9 +335,10 @@ export default {
       this.$nextTick(() => {
         this.role = deepClone(scope.row)
         const routes = this.generateRoutes(this.role.routes)
+        const realRoutes = deepClone(this.routes)
         // this.$refs.tree.setCheckedNodes(this.generateArr(routes))
-        this.selected = this.getchecked(this.routes, this.generateArr(routes))
-        this.$refs.treetable.reloadData(this.getchecked(this.routes, this.generateArr(routes)))
+        this.selected = this.getchecked(realRoutes, this.generateArr(routes))
+        this.$refs.treetable.reloadData(this.selected)
         // set checked state of a node not affects its father and child nodes
         this.checkStrictly = false
       })
@@ -395,7 +399,6 @@ export default {
           }
         }
       } else {
-        console.log(this.role)
         const { data } = await addRole(this.role)
         this.role.key = data.key
         this.rolesList.push(this.role)
