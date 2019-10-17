@@ -130,60 +130,14 @@ function getRoleName() {
 
 export const roles = [
   {
+    id: '1',
     key: 'admin',
     name: '超级管理员',
     description: '我是一个超级管理员，拥有所有权限',
     routes: asyncRoutes
   },
   {
-    key: 'editor',
-    name: '用户',
-    description: '我是一个普通，只有特定权限',
-    routes: test
-  },
-  {
-    key: 'admin',
-    name: '超级管理员',
-    description: '我是一个超级管理员，拥有所有权限',
-    routes: asyncRoutes
-  },
-  {
-    key: 'editor',
-    name: '用户',
-    description: '我是一个普通，只有特定权限',
-    routes: test
-  },
-  {
-    key: 'admin',
-    name: '超级管理员',
-    description: '我是一个超级管理员，拥有所有权限',
-    routes: asyncRoutes
-  },
-  {
-    key: 'editor',
-    name: '用户',
-    description: '我是一个普通，只有特定权限',
-    routes: test
-  },
-  {
-    key: 'admin',
-    name: '超级管理员',
-    description: '我是一个超级管理员，拥有所有权限',
-    routes: asyncRoutes
-  },
-  {
-    key: 'editor',
-    name: '用户',
-    description: '我是一个普通，只有特定权限',
-    routes: test
-  },
-  {
-    key: 'admin',
-    name: '超级管理员',
-    description: '我是一个超级管理员，拥有所有权限',
-    routes: asyncRoutes
-  },
-  {
+    id: '2',
     key: 'editor',
     name: '用户',
     description: '我是一个普通，只有特定权限',
@@ -202,14 +156,14 @@ const tokens = {
 
 const users = {
   'admin-token': {
-    roles: ['admin'],
+    roles: ['1'],
     introduction: 'I am a super administrator',
     avatar: 'https://wpimg.wallstcn.com/f778738c-e4f8-4870-b634-56703b4acafe.gif',
     name: 'Super Admin',
     department: 'Super'
   },
   'editor-token': {
-    roles: ['editor'],
+    roles: ['2'],
     introduction: 'I am an editor',
     avatar: 'https://wpimg.wallstcn.com/f778738c-e4f8-4870-b634-56703b4acafe.gif',
     name: 'Normal Editor',
@@ -294,12 +248,14 @@ export default [
     type: 'post',
     response: config => {
       const res = config.body
-      var orignRuter = []
+      let orignRuter = []
       if (res) {
         // eslint-disable-next-line no-unused-vars
-        for (const i in res) {
-          if (roles[i].key === res[i]) orignRuter = orignRuter.concat(roles[i].routes)
-        }
+        roles.forEach(item => {
+          for (const i in res) {
+            if (item.id === res[i]) orignRuter = orignRuter.concat(item.routes)
+          }
+        })
       } else {
         return {
           code: 12345,

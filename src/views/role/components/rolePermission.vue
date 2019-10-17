@@ -1,26 +1,26 @@
 <template>
   <div class="app-container">
-    <el-button type="primary" @click="handleAddRole">新建角色</el-button>
+    <el-button v-if="ifAddRole" type="primary" @click="handleAddRole">新建角色</el-button>
 
     <el-table :data="rolesList" style="width: 100%;margin-top:30px;" border>
       <el-table-column align="center" label="ID" width="100" type="index" :index="1" />
       <el-table-column align="center" label="角色名" width="220">
         <template slot-scope="scope">{{ scope.row.name }}</template>
       </el-table-column>
-      <el-table-column align="header-center" label="角色描述" width="220" :show-overflow-tooltip="true">
+      <el-table-column align="header-center" label="角色描述" width="500" :show-overflow-tooltip="true">
         <template slot-scope="scope">{{ scope.row.description }}</template>
       </el-table-column>
       <el-table-column align="center" label="操作">
         <template slot-scope="scope">
-          <el-button type="primary" size="small" @click="handleEdit(scope)">编辑</el-button>
-          <el-button type="danger" size="small" @click="handleDelete(scope)">删除</el-button>
+          <el-button v-if="ifEditRole" type="primary" size="small" @click="handleEdit(scope)">编辑</el-button>
+          <el-button v-if="ifDeleRole" type="danger" size="small" @click="handleDelete(scope)">删除</el-button>
         </template>
       </el-table-column>
     </el-table>
 
     <el-dialog :visible.sync="dialogVisible" :title="dialogType==='edit'?'编辑角色':'新建角色'">
       <el-form :model="role" label-width="80px" label-position="left">
-        <el-form-item label="姓名">
+        <el-form-item label="角色名">
           <el-input v-model="role.name" placeholder="Role Name" />
         </el-form-item>
         <el-form-item label="描述">
@@ -70,6 +70,7 @@
 </template>
 
 <script>
+import store from '@/store'
 import path from 'path'
 import { deepClone } from '@/utils'
 import {
@@ -77,7 +78,8 @@ import {
   getRoles,
   addRole,
   deleteRole,
-  updateRole
+  updateRole,
+  getRoleEditPMS
 } from '@/api/role'
 
 const defaultRole = {
@@ -102,11 +104,16 @@ export default {
         label: 'title'
       },
       selected: [],
-      checkedRoute: []
+      checkedRoute: [],
+      RoleEditPMS: [],
+      ifAddRole: false,
+      ifEditRole: false,
+      ifDeleRole: false
     }
   },
   computed: {
     routesData() {
+      console.log(this.selected)
       return this.selected
     }
   },
@@ -114,8 +121,44 @@ export default {
     // Mock: get all routes and roles list from server
     this.getRoutes()
     this.getRoles()
+    this.getRoleEditPMS()
+    this.setButtonPMS()
   },
   methods: {
+    setButtonPMS() {
+      if (this.RoleEditPMS) {
+        // eslint-disable-next-line no-unused-vars
+        for (const i of this.RoleEditPMS) {
+          if (i === 'NewRole') this.ifAddRole = true
+          if (i === 'EditRole') this.ifEditRole = true
+          if (i === 'DeleRole') this.ifDeleRole = true
+        }
+      } else {
+        console.log('该页面按钮权限不存在，请检查错误')
+      }
+    },
+    getRoleEditPMS() {
+      const routeName = this.$route.name
+      const rolesPMS = store.getters.rolesPMS
+      console.log(rolesPMS)
+      // eslint-disable-next-line no-unused-vars
+      for (const i of rolesPMS) {
+        if (i.name === routeName) {
+          this.RoleEditPMS = i.hasBPMS
+        }
+      }
+    },
+    /*
+    以下是树形表格对应的方法
+    树形表格基于vxe-table组件和elementUI的checkbox组件，以下方法对应参数可以查询
+    vuex-table:https://xuliangzhan_admin.gitee.io/vxe-table/#/table/api
+    elementUI：https://element.eleme.cn/#/zh-CN/component/checkbox
+    getRowClass({ row, index }):设置表格每行的样式，用于隐藏扩展行图标
+    selectAllEvent({ selection, checked }):设置表格自带checkbox全选事件
+    handleCheckAllChange(val):elementUI的checkbox全选事件
+    handleCheckedChange(value, row):elementui的checkbox切换（change）事件
+    selectChangeEvent({ rowIndex, checked }):设置表格自带checkbox切换（change）事件
+    */
     selectAllEvent({ selection, checked }) {
       if (checked) {
         const res = []
@@ -140,22 +183,12 @@ export default {
       }
     },
     handleCheckAllChange(val) {
-      // route = this.selected[val].children.filter(item => {
-      //   const res = {}
-      //   for(const i in route)
-      //   return res
-      // })
       const route = []
       this.selected[val].children.filter(item => {
         route.push(item.name)
       })
       this.selected[val].checked = this.selected[val].checkAll ? route : []
       this.isIndeterminate = false
-      // if (!this.routes[val].checked) {
-      //   this.checkedRoute = this.checkedRoutes.filter(item => {
-      //     return item !== this.routes[val].title
-      //   })
-      // }
     },
     handleCheckedChange(value, row) {
       this.$nextTick(() => {
@@ -211,6 +244,14 @@ export default {
         }
       }
     },
+    /*
+      以下方法是数据处理方法
+      getchecked(routes, selected)：将选择checked的数据和原路由对比，生成表格展示数据。
+      若要实现路由无限层级必须重写该方法，同时该方法涉及到js函数传参引用类型对象的修改（即传入的参数
+      必须深复制后传入，否则会造成对原数据的污染）
+      getcheckedArr(routes)：检查树形表格中checkbox选中项
+      若要实现路由无限层级必须重写该方法
+    */
     getchecked(routes, selected) {
       const checkedRoute = []
       routes.forEach(route => {
@@ -255,6 +296,7 @@ export default {
 
       return res
     },
+    // 以下为ajax取值方法
     async getRoutes() {
       const res = await getRoutes()
       this.serviceRoutes = res.data
@@ -264,6 +306,10 @@ export default {
     async getRoles() {
       const res = await getRoles()
       this.rolesList = res.data
+    },
+    async getRolePMS() {
+      const res = await getRoleEditPMS()
+      this.RoleEditPMS = res.data
     },
 
     // Reshape the routes structure so that it looks the same as the sidebar
@@ -335,6 +381,7 @@ export default {
       this.$nextTick(() => {
         this.role = deepClone(scope.row)
         const routes = this.generateRoutes(this.role.routes)
+        console.log(routes)
         const realRoutes = deepClone(this.routes)
         // this.$refs.tree.setCheckedNodes(this.generateArr(routes))
         this.selected = this.getchecked(realRoutes, this.generateArr(routes))

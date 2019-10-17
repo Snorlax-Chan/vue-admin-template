@@ -36,3 +36,18 @@ export function deleteRole(id) {
     method: 'delete'
   })
 }
+
+export function getRoleAllEditPMS() {
+  return request({
+    url: `/roleAllEditPMS`,
+    method: 'get'
+  })
+}
+
+export function getRoleEditPMS(roles) {
+  return request({
+    url: `/roleEditPMS`,
+    method: 'post',
+    data: roles
+  })
+}

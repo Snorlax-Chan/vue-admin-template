@@ -1,4 +1,5 @@
 import { login, logout, getInfo, getRouter } from '@/api/user'
+import { getRoleEditPMS } from '@/api/role'
 import { getToken, setToken, removeToken } from '@/utils/auth'
 import { resetRouter } from '@/router'
 
@@ -7,7 +8,8 @@ const state = {
   name: '',
   avatar: '',
   roles: [],
-  router: []
+  router: [],
+  rolesPMS: []
 }
 
 const mutations = {
@@ -25,6 +27,9 @@ const mutations = {
   },
   SET_ROLES: (state, roles) => {
     state.roles = roles
+  },
+  SET_ROLESPMS: (state, rolesPMS) => {
+    state.rolesPMS = rolesPMS
   }
 }
 
@@ -73,17 +78,36 @@ const actions = {
     })
   },
 
-  // get usr router
+  // get user router
   getRouter({ commit }, roles) {
     return new Promise((resolve, reject) => {
+      console.log('角色id' + roles)
       getRouter(roles).then(response => {
         const router = response.data
+        console.log(response)
         if (!router || router.length <= 0) {
           reject('getRouter: router must be a non-null array!')
         }
 
         commit('SET_ROUTERS', router)
         resolve(router)
+      })
+    })
+  },
+
+  // get user rolesPMS
+  getRolesPMS({ commit }, roles) {
+    return new Promise((resolve, reject) => {
+      console.log('传入的角色id' + roles)
+      getRoleEditPMS(roles).then(response => {
+        const roleEditPMS = response.data
+        console.log('收到的' + response)
+        if (!roleEditPMS || roleEditPMS.length <= 0) {
+          reject('getRoleEditPMS: roleEditPMS must be a non-null array!')
+        }
+
+        commit('SET_ROLESPMS', roleEditPMS)
+        resolve()
       })
     })
   },

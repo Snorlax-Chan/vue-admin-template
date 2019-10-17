@@ -1,77 +1,68 @@
+/* eslint-disable no-unused-vars */
 <template>
-  <div>
-    <el-row>
-      <el-col :span="18">
-        <el-table :data="tableData" style="width: 100%" border>
-          <el-table-column label="ID" width="60" type="index" :index="1" align="center" />
-          <el-table-column label="姓名" width="130">
-            <template slot-scope="scope">
-              <p>{{ scope.row.name }}</p>
-            </template>
-          </el-table-column>
-          <el-table-column label="部门" width="130">
-            <template slot-scope="scope">
-              <p>{{ scope.row.department }}</p>
-            </template>
-          </el-table-column>
-          <el-table-column label="角色" width="100">
-            <template slot-scope="scope">
-              <p>{{ scope.row.roles }}</p>
-            </template>
-          </el-table-column>
-          <el-table-column label="操作">
-            <template slot-scope="scope">
-              <el-button size="mini" @click="handleEdit(scope.row)">编辑</el-button>
-              <el-button size="mini" type="danger" @click="handleDelete(scope.$index, scope.row)">删除</el-button>
-            </template>
-          </el-table-column>
-        </el-table>
-      </el-col>
-    </el-row>
-
-    <el-dialog title="编辑角色" :visible.sync="dialogFormVisible">
-      <div slot="footer" class="dialog-footer">
-        <el-button @click="dialogFormVisible = false">取 消</el-button>
-        <el-button type="primary" @click="dialogFormVisible = false">确 定</el-button>
-      </div>
-    </el-dialog>
-  </div>
+  <vxe-table ref="roletable" resizable :data="PMSlist" row-id="name">
+    <vxe-table-column field="title" title="页面列表" />
+    <vxe-table-column type="expand" width="60">
+      <template v-slot="{ row, rowIndex }">
+        <el-checkbox
+          v-model="checkAll"
+          :indeterminate="isIndeterminate"
+          @change="handleCheckAllChange(row)"
+        >全选</el-checkbox>
+        <div style="margin: 15px 0;" />
+        <el-checkbox-group v-model="row.hasBPMS" @change="handleCheckedChange(row)">
+          <el-checkbox v-for="item in row.realBPMS" :key="item.id" :label="item.id">{{ item.title }}</el-checkbox>
+        </el-checkbox-group>
+      </template>
+    </vxe-table-column>
+  </vxe-table>
 </template>
 
 <script>
-import { getAllUser } from '@/api/user'
-import { getRoles } from '@/api/role'
 export default {
-  name: 'RoleTable',
+  name: 'TreeTable',
+  props: {
+    routes: {
+      type: Array,
+      required: true,
+      default: function() {
+        return []
+      } }
+  },
   data() {
     return {
-      tableData: [],
-      rolesList: [],
-      dialogFormVisible: false
+      checkAll: false,
+      isIndeterminate: false,
+      pageList: []
     }
   },
-  created() {
-    const tableData = []
-    getAllUser().then(res => {
-      // eslint-disable-next-line no-unused-vars
-      for (const key in res.data) {
-        tableData.push(res.data[key])
-      }
-      this.tableData = tableData
-      console.log(this.tableData)
-    })
-    this.getRoles()
+  computed: {
+    PMSlist() {
+      return this.refreshData()
+    }
   },
   methods: {
-    handleEdit(index, row) {
-      this.dialogFormVisible = true
+    refreshData() {
+      this.pageList = this.routes
+      this.$nextTick(() => {
+        if (this.pageList) { this.$refs.roletable.reloadData(this.pageList) }
+      })
     },
-    handleDelete(index, row) {
-      console.log(index, row)
+    handleCheckAllChange(row) {
+      const list = []
+      row.realBPMS.forEach(item => {
+        list.push(item.id)
+      })
+      row.hasBPMS = this.checkAll ? list : []
     },
-    async getRoles() {
-      const res = await getRoles()
-      this.rolesList = res.data
+    handleCheckedChange(row) {
+      if (row.hasBPMS.length === row.realBPMS.length) {
+        this.checkAll = true
+        this.isIndeterminate = false
+      } else if (row.hasBPMS.length > 0) {
+        this.isIndeterminate = false
+        this.checkAll = false
+      }
     }
   }
 }

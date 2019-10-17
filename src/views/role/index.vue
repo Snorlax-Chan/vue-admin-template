@@ -1,19 +1,19 @@
 <template>
   <div class="icons-container">
     <el-tabs type="border-card">
-      <el-tab-pane label="人员角色分配">
+      <el-tab-pane label="角色数据权限" style="height:100vh;">
         <el-row>
-          <el-col :span="3">
-            <role-menu />
+          <el-col :span="4">
+            <table-menu @handle-current-change="showRolePMS" />
           </el-col>
           <el-row type="flex" justify="center">
-            <el-col :span="22" :offset="2">
-              <role-table />
+            <el-col :span="20" :offset="1">
+              <role-table :routes="rolePMSlist" />
             </el-col>
           </el-row>
         </el-row>
       </el-tab-pane>
-      <el-tab-pane label="角色权限设置">
+      <el-tab-pane label="角色权限设置" style="height:100vh;">
         <role-permission />
       </el-tab-pane>
     </el-tabs>
@@ -21,24 +21,29 @@
 </template>
 
 <script>
-import RoleMenu from './components/roleMenu'
 import RoleTable from './components/roleTable'
 import RolePermission from './components/rolePermission'
+import TableMenu from './components/tableMenu'
 export default {
   name: 'Role',
   components: {
-    RoleMenu,
     RoleTable,
-    RolePermission
+    RolePermission,
+    TableMenu
   },
   data() {
     return {
-      activeName: 'first'
+      rolePMSlist: []
     }
   },
   created() {
+
   },
   methods: {
+    showRolePMS(val) {
+      this.rolePMSlist = val.routesCount
+      console.log('收到数据', this.rolePMSlist)
+    }
   }
 }
 </script>
