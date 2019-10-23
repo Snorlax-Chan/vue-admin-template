@@ -1,26 +1,22 @@
 <template>
-  <div class="app-container">
-    <el-input
-      v-model="filterText"
-      placeholder="Filter keyword"
-      style="margin-bottom:30px;"
-    />
-
-    <el-tree
-      ref="tree2"
-      :data="data2"
-      :props="defaultProps"
-      :filter-node-method="filterNode"
-      class="filter-tree"
-      default-expand-all
-    />
-
+  <div class="icons-container">
+    <el-row>
+      <el-col :span="6"><dep-menu /></el-col>
+      <el-col :span="18"><dep-users /></el-col>
+    </el-row>
   </div>
 </template>
 
 <script>
+import DepMenu from './compoments/depMenu'
+import DepUsers from './compoments/depUsers'
+
 export default {
-  name: 'Tree',
+  name: 'Person',
+  components: {
+    DepMenu,
+    DepUsers
+  },
   data() {
     return {
       filterText: '',
@@ -79,4 +75,13 @@ export default {
   }
 }
 </script>
+
+<style scoped>
+.icons-container {
+  margin: 10px 20px 0;
+  overflow: hidden;
+  box-shadow: gainsboro 0px 0px 6px;
+  height: 100vh;
+}
+</style>
 

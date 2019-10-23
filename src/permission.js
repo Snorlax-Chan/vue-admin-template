@@ -38,9 +38,7 @@ router.beforeEach(async(to, from, next) => {
           // note: roles must be a object array! such as: ['admin'] or ,['developer','editor']
           // console.log('异步取路由信息开始')
           const roles = await store.dispatch('user/getInfo')
-          console.log(roles)
           await store.dispatch('user/getRolesPMS', roles)
-          console.log('得到的按钮权限' + store.getters.rolesPMS)
           const routers = await store.dispatch('user/getRouter', roles)
           // generate accessible routes map based on roles
           const accessRoutes = await store.dispatch('permission/generateRoutes', routers)

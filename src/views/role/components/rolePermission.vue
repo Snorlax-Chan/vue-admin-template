@@ -113,7 +113,6 @@ export default {
   },
   computed: {
     routesData() {
-      console.log(this.selected)
       return this.selected
     }
   },
@@ -140,7 +139,6 @@ export default {
     getRoleEditPMS() {
       const routeName = this.$route.name
       const rolesPMS = store.getters.rolesPMS
-      console.log(rolesPMS)
       // eslint-disable-next-line no-unused-vars
       for (const i of rolesPMS) {
         if (i.name === routeName) {

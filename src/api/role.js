@@ -46,7 +46,7 @@ export function getRoleAllEditPMS() {
 
 export function getRoleEditPMS(roles) {
   return request({
-    url: `/roleEditPMS`,
+    url: `/EditRolePMS`,
     method: 'post',
     data: roles
   })

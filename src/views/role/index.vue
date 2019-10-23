@@ -7,13 +7,13 @@
             <table-menu @handle-current-change="showRolePMS" />
           </el-col>
           <el-row type="flex" justify="center">
-            <el-col :span="20" :offset="1">
+            <el-col :span="20">
               <role-table :routes="rolePMSlist" />
             </el-col>
           </el-row>
         </el-row>
       </el-tab-pane>
-      <el-tab-pane label="角色权限设置" style="height:100vh;">
+      <el-tab-pane label="角色页面权限" style="height:100vh;">
         <role-permission />
       </el-tab-pane>
     </el-tabs>
@@ -42,7 +42,6 @@ export default {
   methods: {
     showRolePMS(val) {
       this.rolePMSlist = val.routesCount
-      console.log('收到数据', this.rolePMSlist)
     }
   }
 }

@@ -1,17 +1,16 @@
 /* eslint-disable no-unused-vars */
 <template>
-  <vxe-table ref="roletable" resizable :data="PMSlist" row-id="name">
+  <vxe-table ref="roletable" resizable :data="PMSlist">
     <vxe-table-column field="title" title="页面列表" />
     <vxe-table-column type="expand" width="60">
       <template v-slot="{ row, rowIndex }">
         <el-checkbox
-          v-model="checkAll"
+          v-model="row.checkAll"
           :indeterminate="isIndeterminate"
           @change="handleCheckAllChange(row)"
         >全选</el-checkbox>
-        <div style="margin: 15px 0;" />
-        <el-checkbox-group v-model="row.hasBPMS" @change="handleCheckedChange(row)">
-          <el-checkbox v-for="item in row.realBPMS" :key="item.id" :label="item.id">{{ item.title }}</el-checkbox>
+        <el-checkbox-group v-model="row.hasBPMS" style="display:inline" @change="handleCheckedChange(row)">
+          <el-checkbox v-for="item in row.realBPMS" :key="item.id" :label="item.name">{{ item.title }}</el-checkbox>
         </el-checkbox-group>
       </template>
     </vxe-table-column>
@@ -51,17 +50,20 @@ export default {
     handleCheckAllChange(row) {
       const list = []
       row.realBPMS.forEach(item => {
-        list.push(item.id)
+        list.push(item.name)
       })
-      row.hasBPMS = this.checkAll ? list : []
+      row.hasBPMS = row.checkAll ? list : []
     },
     handleCheckedChange(row) {
       if (row.hasBPMS.length === row.realBPMS.length) {
-        this.checkAll = true
+        row.checkAll = true
         this.isIndeterminate = false
       } else if (row.hasBPMS.length > 0) {
+        this.isIndeterminate = true
+        row.checkAll = false
+      } else {
         this.isIndeterminate = false
-        this.checkAll = false
+        row.checkAll = false
       }
     }
   }

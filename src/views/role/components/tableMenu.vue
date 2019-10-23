@@ -26,11 +26,13 @@ export default {
   created() {
     getRoleAllEditPMS().then(res => {
       this.tableData = res.data
+      this.$nextTick(() => {
+        this.$refs.singleTable.setCurrentRow(this.tableData[0])
+      })
     })
   },
   methods: {
     handleCurrentChange(val) {
-      console.log(val)
       this.currentRow = val
       this.$emit('handle-current-change', val)
     }

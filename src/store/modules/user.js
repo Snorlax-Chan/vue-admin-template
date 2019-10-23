@@ -81,10 +81,8 @@ const actions = {
   // get user router
   getRouter({ commit }, roles) {
     return new Promise((resolve, reject) => {
-      console.log('角色id' + roles)
       getRouter(roles).then(response => {
         const router = response.data
-        console.log(response)
         if (!router || router.length <= 0) {
           reject('getRouter: router must be a non-null array!')
         }
@@ -98,10 +96,8 @@ const actions = {
   // get user rolesPMS
   getRolesPMS({ commit }, roles) {
     return new Promise((resolve, reject) => {
-      console.log('传入的角色id' + roles)
       getRoleEditPMS(roles).then(response => {
         const roleEditPMS = response.data
-        console.log('收到的' + response)
         if (!roleEditPMS || roleEditPMS.length <= 0) {
           reject('getRoleEditPMS: roleEditPMS must be a non-null array!')
         }

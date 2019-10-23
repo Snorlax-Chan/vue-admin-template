@@ -23,16 +23,16 @@ export const asyncRoutes = [
     meta: { title: '权限管理', icon: 'password' },
     children: [
       {
+        path: 'person',
+        name: 'Person',
+        component: 'person',
+        meta: { title: '人员管理', icon: 'person' }
+      },
+      {
         path: 'role',
         name: 'Role',
         component: 'role',
         meta: { title: '角色权限', icon: 'peoples' }
-      },
-      {
-        path: 'tree',
-        name: 'Tree',
-        component: 'tree',
-        meta: { title: 'Tree', icon: 'tree' }
       }
     ]
   },

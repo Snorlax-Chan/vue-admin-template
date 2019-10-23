@@ -12,14 +12,24 @@ const roleEditPMS = [
       id: '1',
       name: 'Dashboard',
       title: '首页',
+      checkAll: true,
       hasBPMS: [],
       realBPMS: []
     },
     {
       id: '2',
+      name: 'Person',
+      title: '人员管理',
+      checkAll: true,
+      hasBPMS: [],
+      realBPMS: []
+    },
+    {
+      id: '3',
       name: 'Role',
       title: '角色权限',
-      hasBPMS: [],
+      checkAll: true,
+      hasBPMS: ['NewRole', 'EditRole', 'DeleRole'],
       realBPMS: [{
         id: '2-1',
         name: 'NewRole',
@@ -38,16 +48,10 @@ const roleEditPMS = [
       ]
     },
     {
-      id: '3',
-      name: 'Tree',
-      title: '未定义模块',
-      hasBPMS: [],
-      realBPMS: []
-    },
-    {
       id: '4',
       name: 'Form',
       title: '表格',
+      checkAll: true,
       hasBPMS: [],
       realBPMS: []
     },
@@ -55,6 +59,7 @@ const roleEditPMS = [
       id: '5',
       name: 'Nested',
       title: '扩展',
+      checkAll: true,
       hasBPMS: [],
       realBPMS: []
     },
@@ -62,6 +67,7 @@ const roleEditPMS = [
       id: '6',
       name: 'External',
       title: '外链',
+      checkAll: true,
       hasBPMS: [],
       realBPMS: []
     }
@@ -76,6 +82,7 @@ const roleEditPMS = [
       id: '1',
       name: 'Dashboard',
       title: '首页',
+      checkAll: true,
       hasBPMS: [],
       realBPMS: []
     }]
@@ -152,38 +159,38 @@ export default [
         data: roleEditPMS
       }
     }
-  }
+  },
 
   // user roleEditPMS
-  // {
-  //   url: '/roleEditPMS',
-  //   type: 'post',
-  //   response: config => {
-  //     const res = config.body
-  //     let resRoleEditPMS = []
-  //     if (!res) {
-  //       roleEditPMS.forEach(item => {
-  //         // eslint-disable-next-line no-unused-vars
-  //         for (const i in res) {
-  //           if (item.id === res[i]) resRoleEditPMS = resRoleEditPMS.concat(item.routesCount)
-  //         }
-  //       })
-  //     } else {
-  //       return {
-  //         code: 12345,
-  //         message: 'roles are incorrect.'
-  //       }
-  //     }
-  //     if (!resRoleEditPMS) {
-  //       return {
-  //         code: 123,
-  //         message: 'resRoleEditPMS are incorrect.'
-  //       }
-  //     }
-  //     return {
-  //       code: 20000,
-  //       data: resRoleEditPMS
-  //     }
-  //   }
-  // }
+  {
+    url: '/EditRolePMS',
+    type: 'post',
+    response: config => {
+      const res = config.body
+      let resRoleEditPMS = []
+      if (res) {
+        roleEditPMS.forEach(item => {
+          // eslint-disable-next-line no-unused-vars
+          for (const i in res) {
+            if (item.id === res[i]) resRoleEditPMS = resRoleEditPMS.concat(item.routesCount)
+          }
+        })
+      } else {
+        return {
+          code: 12345,
+          message: 'roles are incorrect.'
+        }
+      }
+      if (!resRoleEditPMS) {
+        return {
+          code: 123,
+          message: 'resRoleEditPMS are incorrect.'
+        }
+      }
+      return {
+        code: 20000,
+        data: resRoleEditPMS
+      }
+    }
+  }
 ]
