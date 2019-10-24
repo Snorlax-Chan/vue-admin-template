@@ -43,14 +43,17 @@ const departmentList = [{
 }]
 
 const AllDepUsers = Mock.mock({
-  'AllDepUsers|108': [{ id: '@id',
+  'AllDepUsers|108': [{
+    id: '@id',
     name: '@cname',
     'role|1': ['经理', '超管', '人事'],
     'department|1': ['人事部', '开发部', '销售部'],
     'status|1': Boolean,
     'sex|1': [0, 1],
     email: '@email',
-    content: /^1[0-9]{10}$/ }]
+    content: /^1[0-9]{10}$/,
+    date: '@date'
+  }]
 })
 
 function mockUserInfo(total, pageSize, currentPage) {
