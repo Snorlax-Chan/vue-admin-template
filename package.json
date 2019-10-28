@@ -18,7 +18,7 @@
     },
     "dependencies": {
         "axios": "0.18.1",
-        "element-ui": "2.7.2",
+        "element-ui": "^2.12.0",
         "js-cookie": "2.2.0",
         "normalize.css": "7.0.0",
         "nprogress": "0.2.0",
@@ -67,7 +67,8 @@
         "svgo": "1.2.2",
         "vue-template-compiler": "2.6.10",
         "vxe-table": "^2.5.22",
-        "xe-utils": "^2.2.10"
+        "vxe-utils": "^1.7.2",
+        "xe-utils": "^2.2.11"
     },
     "engines": {
         "node": ">=8.9",

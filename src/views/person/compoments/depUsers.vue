@@ -21,14 +21,14 @@
               </el-button>
             </el-tooltip>
             <el-tooltip effect="dark" content="批量删除" placement="top">
-              <el-button circle class="icon-type" @click="deleUsers(false)">
+              <el-button circle class="icon-type" @click="deleUsers(false,'')">
                 <svg-icon icon-class="trash" />
               </el-button>
             </el-tooltip>
             <el-tooltip effect="dark" content="新增用户" placement="top">
-              <el-button round class="add-type" @click="EditUsers(false)">
+              <el-button round class="add-type" @click="EditUsers(false,'')">
                 <svg-icon icon-class="pluss-2" style="font-size:30px;vertical-align: middle;" />
-                <span style="padding: 0px 8px 0px 0px;">新增</span>
+                <span style="padding: 0px 14px 0px 0px;">新增</span>
               </el-button>
             </el-tooltip>
             <el-input
@@ -63,20 +63,39 @@
         <vxe-table-column field="role" title="职位" />
         <vxe-table-column field="content" title="联系方式" />
         <vxe-table-column field="department" title="部门" />
-        <vxe-table-column field="status" title="状态">
+        <vxe-table-column field="status" title="状态" width="60">
           <template v-slot="{row}">
             <el-tooltip v-if="row.status" effect="dark" content="用户正常" placement="top">
               <svg-icon v-if="row.status" icon-class="sun" style="color:#25d410;font-size:20px;" />
             </el-tooltip>
             <el-tooltip v-if="!row.status" effect="dark" content="用户已被锁定" placement="top">
-              <svg-icon v-if="!row.status" icon-class="sun" style="color:slategrey;font-size:20px;" />
+              <svg-icon
+                v-if="!row.status"
+                icon-class="sun"
+                style="color:slategrey;font-size:20px;"
+              />
             </el-tooltip>
           </template>
         </vxe-table-column>
         <vxe-table-column title="操作">
-          <template v-slot="{row}">
-            <vxe-button type="text" @click="EditUsers(row)">编辑</vxe-button>
-            <vxe-button type="text" @click="deleUsers(row)">删除</vxe-button>
+          <template v-slot="{row,$rowIndex}">
+            <vxe-button type="text" @click="EditUsers(true,row)">编辑</vxe-button>
+            <el-popover :ref="`popover-${$rowIndex}`" width="160" placement="top">
+              <p>确定删除该项吗？</p>
+              <div style="text-align: right; margin: 0">
+                <el-button
+                  type="text"
+                  size="mini"
+                  @click="$refs[`popover-${$rowIndex}`].doClose()"
+                >取消</el-button>
+                <el-button
+                  type="danger"
+                  size="mini"
+                  @click="deleUsers(true,row);$refs[`popover-${$rowIndex}`].doClose()"
+                >确定</el-button>
+              </div>
+              <vxe-button slot="reference" type="text">删除</vxe-button>
+            </el-popover>
           </template>
         </vxe-table-column>
       </vxe-table>
@@ -142,7 +161,9 @@
     >
       <el-row>
         <el-col style="text-align:center">
-          <svg-icon icon-class="user-2" style="font-size:50px;" />
+          <el-avatar>
+            <svg-icon icon-class="user-2" style="font-size: 40px;" />
+          </el-avatar>
         </el-col>
       </el-row>
       <el-row>
@@ -158,16 +179,15 @@
               <span class="userinfo-span">
                 {{ userInfo.name }}
                 <el-tooltip v-if="userInfo.status" effect="dark" content="帐号正常" placement="right">
-                  <svg-icon
-                    icon-class="sun"
-                    style="color:#25d410;font-size:20px;margin-left:3px;"
-                  />
+                  <svg-icon icon-class="sun" style="color:#25d410;font-size:20px;margin-left:3px;" />
                 </el-tooltip>
-                <el-tooltip v-if="!userInfo.status" effect="dark" content="帐号异常，已被锁定" placement="right">
-                  <svg-icon
-                    icon-class="sun"
-                    style="color:slategrey;font-size:20px;"
-                  />
+                <el-tooltip
+                  v-if="!userInfo.status"
+                  effect="dark"
+                  content="帐号异常，已被锁定"
+                  placement="right"
+                >
+                  <svg-icon icon-class="sun" style="color:slategrey;font-size:20px;" />
                 </el-tooltip>
               </span>
             </div>
@@ -175,26 +195,28 @@
               <span>性别：</span>
               <span class="userinfo-span">
                 <el-tooltip v-if="userInfo.sex === 1" effect="dark" content="男" placement="right">
-                  <svg-icon
-                    icon-class="male"
-                    style="font-size:16px;color: teal;"
-                  />
+                  <svg-icon icon-class="male" style="font-size:16px;color: teal;" />
                 </el-tooltip>
                 <el-tooltip v-if="userInfo.sex === 0" effect="dark" content="女" placement="right">
-                  <svg-icon
-                    icon-class="female"
-                    style="font-size:16px;color: thistle;"
-                  />
+                  <svg-icon icon-class="female" style="font-size:16px;color: thistle;" />
                 </el-tooltip>
               </span>
             </div>
             <div class="userinfo-div">
               <span>职位：</span>
-              <span class="userinfo-span">{{ userInfo.role }}</span>
+              <span class="userinfo-span">
+                <span v-for="item in userInfo.role" :key="item" style="margin-left:5px;">{{ item }}</span>
+              </span>
             </div>
             <div class="userinfo-div">
               <span>部门：</span>
-              <span class="userinfo-span">{{ userInfo.department }}</span>
+              <span class="userinfo-span">
+                <span
+                  v-for="item in userInfo.department "
+                  :key="item"
+                  style="margin-left:5px;"
+                >{{ item }}</span>
+              </span>
             </div>
             <div class="userinfo-div">
               <span>手机号：</span>
@@ -213,109 +235,333 @@
       </div>
       <span slot="footer" class="dialog-footer" />
     </el-dialog>
-    <el-dialog
-      :title="dialogTitle"
-      :visible.sync="dialogEditVisible"
-      width="35%"
+    <el-drawer
+      :visible.sync="drawer"
+      direction="rtl"
       center
-      class="dialog_type"
+      :before-close="handleClose"
+      width="25%"
     >
-
-      <span slot="footer" class="dialog-footer" />
-    </el-dialog>
+      <el-row slot="title" style="border-bottom:1px;">
+        <el-col :span="4">
+          <el-button type="success" round size="small" @click="submitInfo">提交</el-button>
+        </el-col>
+        <el-col :span="20" style="text-align: center;">
+          <span
+            style="font-weight: bolder;font-weight: bolder;font-size: 25px;vertical-align: -webkit-baseline-middle;"
+          >{{ drawerTitle }}</span>
+        </el-col>
+      </el-row>
+      <el-card shadow="never">
+        <div class="avatar-type">
+          <span style="display: block;width: fit-content;">
+            <el-avatar :size="50">
+              <svg-icon icon-class="user-2" style="font-size: 50px;" />
+            </el-avatar>
+          </span>
+        </div>
+        <div style="padding:0px 20px 20px 20px ;" class="drawerinIput-type">
+          <el-form
+            ref="infoForm"
+            :rules="rules"
+            :model="userInfo"
+            label-width="80px"
+            validate-on-rule-change
+            status-icon
+          >
+            <el-form-item label="用户名" prop="name">
+              <el-input v-model="userInfo.name" />
+            </el-form-item>
+            <el-form-item label="联系方式" prop="content">
+              <el-input v-model="userInfo.content" />
+            </el-form-item>
+            <el-form-item label="邮箱" prop="email">
+              <el-input v-model="userInfo.email" />
+            </el-form-item>
+            <el-form-item label="性别" prop="sex">
+              <el-radio-group v-model="userInfo.sex">
+                <el-radio :label="1">男</el-radio>
+                <el-radio :label="0">女</el-radio>
+              </el-radio-group>
+            </el-form-item>
+            <el-form-item label="部门" prop="department">
+              <el-select
+                v-model="userInfo.department"
+                placeholder="请选择"
+                multiple
+                filterable
+                clearable
+              >
+                <el-option-group v-for="group in depList" :key="group.id" :label="group.name">
+                  <el-option
+                    v-for="item in group.children"
+                    :key="item.id"
+                    :label="item.name"
+                    :value="item.id"
+                  />
+                </el-option-group>
+              </el-select>
+            </el-form-item>
+            <el-form-item label="职位" prop="role">
+              <el-select v-model="userInfo.role" placeholder="请选择" multiple filterable clearable>
+                <el-option
+                  v-for="item in rolesList"
+                  :key="item.id"
+                  :label="item.name"
+                  :value="item.id"
+                />
+              </el-select>
+            </el-form-item>
+            <el-form-item label="是否激活" prop="status">
+              <el-switch v-model="userInfo.status" active-color="#13ce66" inactive-color="#606266" />
+            </el-form-item>
+          </el-form>
+        </div>
+      </el-card>
+    </el-drawer>
   </div>
 </template>
 
 <script>
-import { getAlluser, getAlldep, changeDp, changeStatus, deleUsers } from '@/api/department'
+import { getAlluser, getAlldep, changeDp, changeStatus, deleUsers, updateUsers, addNewUsers, getSearchedLength, getSeacheduser, getAllUsersLength } from '@/api/department'
+import { getRoles } from '@/api/role'
+const defaultUserInfo = {
+  id: '',
+  name: '',
+  role: '',
+  department: '',
+  status: '',
+  sex: '',
+  email: '',
+  content: ''
+}
+
 export default {
+  props: {
+    checkedDp: {
+      type: String,
+      required: false,
+      default: () => {
+        return ''
+      }
+    }
+  },
   data() {
     return {
       tableData: [],
       tablePage: {
         currentPage: 1,
         pageSize: 10,
-        totalResult: 88
+        totalResult: 0
       },
       loading: false,
       search: '',
       dialogVisible: false,
       dialogInfoVisible: false,
-      dialogEditVisible: false,
-      dialogTitle: '',
+      drawer: false,
+      visible: false,
+      drawerTitle: '',
       changeList: [],
       changedDep: [],
       depList: [],
-      userInfo: {
-        id: '',
-        name: '',
-        role: '',
-        department: '',
-        status: '',
-        sex: '',
-        email: '',
-        content: ''
+      rolesList: [],
+      userInfo: Object.assign({}, defaultUserInfo),
+      rules: {
+        name: [
+          { required: true, message: '请输入用户名', trigger: 'blur' },
+          { min: 2, max: 25, message: '长度在 2 到 5 个字符', trigger: 'blur' }
+        ],
+        content: [
+          { required: true, message: '请输入联系方式', trigger: 'blur' }
+        ],
+        email: [
+          { type: 'email', required: true, message: '请输入正确的邮箱地址', trigger: 'blur' }
+        ],
+        sex: [
+          { required: true, message: '请选择性别', trigger: 'change' }
+        ],
+        department: [
+          { required: true, message: '请分配部门', trigger: 'blur' }
+        ],
+        role: [
+          { required: true, message: '请分配角色', trigger: 'blur' }
+        ],
+        status: [
+          { required: false, message: '未激活状态！', trigger: 'change' }
+        ]
+      }
+    }
+  },
+  watch: {
+    async search() {
+      const search = this.$utils.toString(this.search).trim().toLowerCase()
+      if (search) {
+        // console.log()
+        await this.getTotal(search)
+        await this.getSeacheduser()
+        console.log('-----search-------')
+        console.log(this.tablePage.totalResult)
+      } else {
+        console.log('---------real---------')
+        await this.getAllUsersLength()
+        await this.getAlluser()
       }
     }
   },
   created() {
-    this.getAlluser(this.tablePage.totalResult, this.tablePage.pageSize, this.tablePage.currentPage)
+    console.log('-----------')
+    this.getAllUsersLength()
+    this.getAlluser()
+    console.log('111111111111111111')
     this.getAlldep()
+    this.getRoles()
   },
   methods: {
+    async getAllUsersLength() {
+      console.log('进入函数一')
+      await getAllUsersLength().then(res => {
+        console.log('函数一执行')
+        this.tablePage.totalResult = res.data
+        this.loading = true
+      })
+    },
+    getSeacheduser() {
+      getSeacheduser(this.tablePage.totalResult, this.tablePage.pageSize, this.tablePage.currentPage).then(res => {
+        this.tableData = res.data
+        this.$nextTick(() => {
+          this.$refs.depUsers.reloadData(this.tableData)
+        })
+        this.loading = false
+      })
+    },
+    getTotal(search) {
+      getSearchedLength(search).then(res => {
+        this.tablePage.totalResult = res.data
+        this.loading = true
+      })
+    },
+    getRoles() {
+      getRoles().then(res => {
+        this.rolesList = res.data
+      })
+    },
     getAlldep() {
       getAlldep().then(res => {
         this.depList = res.data
       })
     },
-    getAlluser(total, tablePage, currentPage) {
+    async getAlluser() {
+      console.log('函数二执行')
       // const data = { total: this.totalResult ,pageSize:this.pageSize, }
-      this.loading = true
-      getAlluser(total, tablePage, currentPage).then(res => {
+      console.log('现在' + this.tablePage.totalResult)
+      await getAlluser(this.tablePage.totalResult, this.tablePage.pageSize, this.tablePage.currentPage).then(res => {
+        console.log('之后' + this.tablePage.totalResult)
         this.tableData = res.data
+        this.$nextTick(() => {
+          this.$refs.depUsers.reloadData(this.tableData)
+        })
         this.loading = false
       })
     },
-    EditUsers(isEdit) {
-      this.dialogEditVisible = true
-      this.dialogTitle = isEdit ? '编辑' : '新建'
+    submitInfo() {
+      this.$refs.infoForm.validate(valid => {
+        if (valid) {
+          if (this.drawerTitle === '编辑用户') {
+            updateUsers(this.userInfo.id, this.userInfo).then(res => {
+              if (res.data === 'success') {
+                this.$message({
+                  showClose: true,
+                  message: '用户信息成功！',
+                  type: 'success'
+                })
+              }
+            }).catch(e => {
+              this.$message({
+                showClose: true,
+                message: '用户信息更新失败，错误：' + e,
+                type: 'error'
+              })
+            })
+          } else if (this.drawerTitle === '新增用户') {
+            addNewUsers(this.userInfo).then(res => {
+              if (res.data === 'success') {
+                this.$message({
+                  showClose: true,
+                  message: '用户信息成功！',
+                  type: 'success'
+                })
+              }
+            }).catch(e => {
+              this.$message({
+                showClose: true,
+                message: '用户信息更新失败，错误：' + e,
+                type: 'error'
+              })
+            })
+          }
+        } else {
+          this.$message({
+            showClose: true,
+            message: '提交失败，请检查信息是否填写正确',
+            type: 'error'
+          })
+        }
+      })
+    },
+    EditUsers(isEdit, row) {
+      this.drawer = true
+      this.drawerTitle = isEdit ? '编辑用户' : '新增用户'
+      console.log(row)
+      if (isEdit) {
+        this.userInfo = row
+      } else {
+        this.userInfo = Object.assign({}, defaultUserInfo)
+      }
     },
     showInfo(row) {
       this.userInfo = row
       this.dialogInfoVisible = true
+      console.log(row)
     },
-    deleUsers(row) {
-      this.$confirm('将永久删除用户, 是否继续?', '提示', {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'warning'
-      }).then(() => {
-        this.$nextTick(() => {
-          const data = []
-          if (row) {
-            console.log(row)
-            this.$refs.depUsers.remove(row).then(res => {
+    deleUsers(boolen, row) {
+      this.$nextTick(() => {
+        const data = []
+        if (boolen) {
+          console.log(row)
+          this.$refs.depUsers.remove(row).then(res => {
             // eslint-disable-next-line no-unused-vars
-              data.push(row.id)
-              deleUsers(data).then(res => {
-                if (res.data === 'success') {
-                  this.$message({
-                    showClose: true,
-                    message: '用户删除成功！',
-                    type: 'success'
-                  })
-                }
-              }).catch(e => {
+            data.push(row.id)
+            deleUsers(data).then(res => {
+              if (res.data === 'success') {
                 this.$message({
                   showClose: true,
-                  message: '修改失败，错误信息：' + e,
-                  type: 'error'
+                  message: '用户删除成功！',
+                  type: 'success'
                 })
+              }
+            }).catch(e => {
+              this.$message({
+                showClose: true,
+                message: '修改失败，错误信息：' + e,
+                type: 'error'
               })
             })
-          } else {
+          })
+        } else {
+          if (this.$refs.depUsers.getSelectRecords().length === 0) {
+            return this.$message({
+              showClose: true,
+              message: '请先选中用户！',
+              type: 'warning'
+            })
+          }
+          this.$confirm('将永久删除用户, 是否继续?', '提示', {
+            confirmButtonText: '确定',
+            cancelButtonText: '取消',
+            type: 'warning'
+          }).then(() => {
             this.$refs.depUsers.removeSelecteds().then(res => {
-            // eslint-disable-next-line no-unused-vars
+              // eslint-disable-next-line no-unused-vars
               for (const i of res.rows) {
                 data.push(i.id)
               }
@@ -334,14 +580,14 @@ export default {
                   type: 'error'
                 })
               })
+            }).catch(() => {
+              this.$message({
+                type: 'info',
+                message: '已取消删除'
+              })
             })
-          }
-        })
-      }).catch(() => {
-        this.$message({
-          type: 'info',
-          message: '已取消删除'
-        })
+          })
+        }
       })
     },
     changeStatus(boolen) {
@@ -403,7 +649,11 @@ export default {
     handlePageChange({ currentPage, pageSize }) {
       this.tablePage.currentPage = currentPage
       this.tablePage.pageSize = pageSize
-      this.getAlluser(this.tablePage.totalResult, this.tablePage.pageSize, this.tablePage.currentPage)
+      if (this.search) {
+        this.getSeacheduser()
+      } else {
+        this.getAlluser()
+      }
     },
     confirm() {
       changeDp(this.changeList, this.changedDep).then(res => {
@@ -479,8 +729,8 @@ export default {
   vertical-align: top;
 }
 .vxe-toolbar >>> .add-type:hover,
-.vxe-toolbar >>> .add-type:focus{
-color: #54ea39;
+.vxe-toolbar >>> .add-type:focus {
+  color: #54ea39;
   border-color: #d1d6dc;
   background-color: #8d929c;
 }
@@ -525,4 +775,32 @@ color: #54ea39;
   float: right;
   margin-right: 30px;
 }
+
+.drawerinIput-type >>> .el-input__inner {
+  border-radius: 30px;
+}
+
+.avatar-type {
+  text-align: -webkit-center;
+  margin-bottom: 20px;
+  cursor: pointer;
+}
+
+.avatar-type:hover::after {
+  content: "编辑";
+  z-index: 2;
+  position: absolute;
+  font-size: small;
+  margin: -22px -1px -16px -22px;
+  background-color: #8de2de;
+  color: #6090b9;
+  padding: 2px 10px 1px 10px;
+  opacity: 0.8;
+  border-radius: 0 0 21px 21px;
+}
+
+/* .avatar-type:hover {
+  color: royalblue;
+  background-color: turquoise;
+} */
 </style>

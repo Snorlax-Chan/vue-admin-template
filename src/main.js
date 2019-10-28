@@ -6,7 +6,8 @@ import ElementUI from 'element-ui'
 // import { avatar } from 'element-ui'
 import 'element-ui/lib/theme-chalk/index.css'
 import locale from 'element-ui/lib/locale/lang/en' // lang i18n
-import 'xe-utils'
+import XEUtils from 'xe-utils'
+import VXEUtils from 'vxe-utils'
 import VXETable from 'vxe-table'
 import 'vxe-table/lib/index.css'
 
@@ -35,7 +36,7 @@ if (process.env.NODE_ENV === 'production') {
 // set ElementUI lang to EN
 Vue.use(ElementUI, { locale })
 // Vue.prototype.$notify = avatar
-
+Vue.use(VXEUtils, XEUtils)
 Vue.use(VXETable)
 
 Vue.config.productionTip = false
