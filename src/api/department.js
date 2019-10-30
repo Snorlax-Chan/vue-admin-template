@@ -7,28 +7,28 @@ export function getAlldep() {
   })
 }
 
-export function getAllUsersLength() {
+// export function getAllUsersLength() {
+//   return request({
+//     url: '/department/getAllUsersLength',
+//     method: 'get'
+//   })
+// }
+
+export function getTableData(tableType, stringInfo, property, order, filterName, pageSize, currentPage) {
   return request({
-    url: '/department/getAllUsersLength',
-    method: 'get'
+    url: '/showDep/getTableData',
+    method: 'post',
+    data: { tableType: tableType, stringInfo: stringInfo, property: property, order: order, filterName: filterName, pageSize: pageSize, currentPage: currentPage }
   })
 }
 
-export function getAlluser(total, pageSize, currentPage) {
-  return request({
-    url: '/showDep/Alluser',
-    method: 'post',
-    data: { total: total, pageSize: pageSize, currentPage: currentPage }
-  })
-}
-
-export function getSeacheduser(total, pageSize, currentPage) {
-  return request({
-    url: '/showDep/getSeacheduser',
-    method: 'post',
-    data: { total: total, pageSize: pageSize, currentPage: currentPage }
-  })
-}
+// export function getSeacheduser(total, pageSize, currentPage) {
+//   return request({
+//     url: '/showDep/getSeacheduser',
+//     method: 'post',
+//     data: { total: total, pageSize: pageSize, currentPage: currentPage }
+//   })
+// }
 
 export function changeDp(userId, dpId) {
   return request({
@@ -87,10 +87,19 @@ export function deleDepartment(departmentId) {
   })
 }
 
-export function getSearchedLength(stringInfo) {
-  return request({
-    url: '/department/getSearchedLength',
-    method: 'post',
-    data: { stringInfo: stringInfo }
-  })
-}
+// export function getSearchedLength(stringInfo) {
+//   return request({
+//     url: '/department/getSearchedLength',
+//     method: 'post',
+//     data: { stringInfo: stringInfo }
+//   })
+// }
+
+// export function changeSort(property, order) {
+//   return request({
+//     url: '/showDep/changeSort',
+//     method: 'post',
+//     data: { property: property, order: order }
+//   })
+// }
+

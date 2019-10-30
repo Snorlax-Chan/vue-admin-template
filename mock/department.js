@@ -1,5 +1,6 @@
 import Mock from 'mockjs'
 import XEUtils from 'xe-utils'
+import { deepClone } from '../src/utils'
 
 const departmentList = [{
   id: '1',
@@ -56,30 +57,54 @@ const AllDepUsers = Mock.mock({
     date: '@date'
   }]
 })
-let searchList = []
+// let searchList = []
+let tableData = deepClone(AllDepUsers.AllDepUsers)
+
+function sortByName(order) {
+  if (order === 'asc') {
+    tableData.sort((a, b) => a.name.localeCompare(b.name))
+  } else if (order === 'desc') {
+    tableData.sort((a, b) => b.name.localeCompare(a.name))
+  }
+}
+
+function sortByContent(order) {
+  if (order === 'asc') {
+    tableData.sort((a, b) => a.content - b.content)
+  } else if (order === 'desc') {
+    tableData.sort((a, b) => b.content - a.content)
+  }
+}
+
 function searchUserInfo(filterName) {
   if (filterName) {
     // const filterRE = new RegExp(filterName, 'gi')
     const searchProps = ['id', 'name', 'role', 'department', 'status', 'email', 'content', 'date']
     const rest = AllDepUsers.AllDepUsers.filter(item => searchProps.some(key => XEUtils.toString(item[key]).toLowerCase().indexOf(filterName) > -1))
-    searchList = rest
-    console.log(rest)
     return rest
   }
 }
 
-function mockUserInfo(arr, total, pageSize, currentPage) {
+function filter(property, filterName) {
+  if (filterName) {
+    const searchProps = [property]
+    console.log(searchProps)
+    const rest = AllDepUsers.AllDepUsers.filter(item => searchProps.some(key => XEUtils.toString(item[key]).toLowerCase().indexOf(filterName) > -1))
+    return rest
+  }
+}
+
+function mockUserInfo(pageSize, currentPage) {
   const AllUsers = []
-  const datalist = arr
-  console.log(total, pageSize, currentPage)
+  const datalist = tableData
   const startIndex = pageSize * (currentPage - 1)
+  const total = datalist.length
   const endIndex = (pageSize * (currentPage - 1) + pageSize) < total ? (pageSize * (currentPage - 1) + pageSize) : total
   if (datalist) {
     for (let j = startIndex; j < endIndex; j++) {
       AllUsers.push(datalist[j])
     }
   }
-  console.log(AllUsers)
   return AllUsers
 }
 
@@ -96,33 +121,42 @@ export default [
     }
   },
 
-  // get all user length
+  // show department user
   {
-    url: '/department/getAllUsersLength',
-    type: 'get',
-    response: res => {
-      console.log('是否收到了第一个函数请求')
-      const len = AllDepUsers.AllDepUsers.length
-      return {
-        code: 20000,
-        data: len
-      }
-    }
-  },
-
-  // show All department user
-  {
-    url: '/showDep/Alluser',
+    url: '/showDep/getTableData',
     type: 'post',
     response: res => {
-      console.log('是否收到了第二个函数请求')
-      const { total, pageSize, currentPage } = res.body
-      const arr = AllDepUsers.AllDepUsers
+      let data = []
+      const { tableType, stringInfo, property, order, filterName, pageSize, currentPage } = res.body
+      console.log(tableType, stringInfo, property, order, filterName, pageSize, currentPage)
+      if (tableType === 'all') {
+        console.log('---all------')
+        tableData = deepClone(AllDepUsers.AllDepUsers)
+        data = mockUserInfo(pageSize, currentPage)
+      } else if (tableType === 'search') {
+        console.log('---search------')
+        tableData = searchUserInfo(stringInfo)
+        data = mockUserInfo(pageSize, currentPage)
+      } else if (tableType === 'sort') {
+        if (property === 'name') {
+          console.log('---property------')
+          sortByName(order)
+          console.log('---order---')
+          data = mockUserInfo(pageSize, currentPage)
+        } else if (property === 'content') {
+          sortByContent(order)
+          data = mockUserInfo(pageSize, currentPage)
+        }
+      } else if (tableType === 'filter') {
+        tableData = filter(property, filterName)
+        data = mockUserInfo(pageSize, currentPage)
+      }
       // console.log(mockUserInfo(arr, total, pageSize, currentPage))
       // console.log(mockUserInfo(total, pageSize, currentPage))
       return {
         code: 20000,
-        data: mockUserInfo(arr, total, pageSize, currentPage)
+        data: data,
+        total: tableData.length
       }
     }
   },
@@ -207,37 +241,6 @@ export default [
       return {
         code: 20000,
         data: 'success'
-      }
-    }
-  },
-
-  // get searched department length
-  {
-    url: '/department/getSearchedLength',
-    type: 'post',
-    response: res => {
-      console.log(res.body)
-      searchUserInfo(res.body.stringInfo)
-      const total = searchList.length
-      console.log(total)
-      return {
-        code: 20000,
-        data: total
-      }
-    }
-  },
-
-  // get searched user info
-  {
-    url: '/showDep/getSeacheduser',
-    type: 'post',
-    response: res => {
-      const { total, pageSize, currentPage } = res.body
-      const arr = searchList
-      // console.log(mockUserInfo(total, pageSize, currentPage))
-      return {
-        code: 20000,
-        data: mockUserInfo(arr, total, pageSize, currentPage)
       }
     }
   }
