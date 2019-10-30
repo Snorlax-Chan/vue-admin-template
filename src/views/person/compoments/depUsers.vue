@@ -52,34 +52,80 @@
         :start-index="(tablePage.currentPage - 1) * tablePage.pageSize"
         highlight-hover-row
         :select-config="{reserve: true, trigger: 'row'}"
+        :remote-sort="true"
+        :remote-filter="true"
+        @filter-change="filterNameMethod"
+        @sort-change="sortChange"
       >
         <vxe-table-column type="selection" width="60" />
         <vxe-table-column type="index" title="序号" width="60" />
-        <vxe-table-column field="name" title="姓名">
+        <vxe-table-column field="name" title="姓名" sortable :filters="[{ data: '' }]">
+          <template v-slot:filter="{ column, context }">
+            <template v-for="(option, index) in column.filters">
+              <el-input :key="index" v-model="option.data" class="my-input" type="type" placeholder="按回车确认筛选" @input="context.changeOption($event, !!option.data, option)" @keyup.enter.native="context.confirmFilter()" /></template>
+          </template>
           <template v-slot="{row}">
-            <el-button type="text" @click="showInfo(row)">{{ row.name }}</el-button>
+            <el-button type="text" @click.stop="showInfo(row)">{{ row.name }}</el-button>
           </template>
         </vxe-table-column>
         <vxe-table-column field="role" title="职位" />
-        <vxe-table-column field="content" title="联系方式" />
-        <vxe-table-column field="department" title="部门" />
+        <vxe-table-column field="content" title="联系方式" sortable :filters="[{ data: '' }]">
+          <template v-slot:filter="{ column, context }">
+            <template v-for="(option, index) in column.filters">
+              <el-input :key="index" v-model="option.data" class="my-input" type="type" placeholder="按回车确认筛选" @input="context.changeOption($event, !!option.data, option)" @keyup.enter.native="context.confirmFilter()" /></template>
+          </template>
+        </vxe-table-column>
+        <vxe-table-column field="department" title="部门" :filters="[{ data: [] }]">
+          <template v-slot:filter="{ column, context }">
+            <template v-for="(option, index) in column.filters" class="select-type">
+              <div :key="index" class="div-select-type">
+                <el-select
+                  :key="index"
+                  v-model="option.data"
+                  placeholder="请选择"
+                  multiple
+                  filterable
+                  collapse-tags
+                  clearable
+                  popper-class="filter-select"
+                  :popper-append-to-body="true"
+                  @change="context.changeOption($event, !!option.data, option)"
+                >
+                  <el-option-group v-for="group in depList" :key="group.id" :label="group.name">
+                    <el-option
+                      v-for="item in group.children"
+                      :key="item.id"
+                      :label="item.name"
+                      :value="item.id"
+                    />
+                  </el-option-group>
+                </el-select>
+              </div>
+            </template>
+          </template></vxe-table-column>
         <vxe-table-column field="status" title="状态" width="60">
           <template v-slot="{row}">
             <el-tooltip v-if="row.status" effect="dark" content="用户正常" placement="top">
-              <svg-icon v-if="row.status" icon-class="sun" style="color:#25d410;font-size:20px;" />
+              <svg-icon
+                v-if="row.status"
+                icon-class="sun"
+                style="color:#25d410;font-size:20px;cursor: pointer;"
+                @click.stop="changeSingleStatus(row)"
+              />
             </el-tooltip>
             <el-tooltip v-if="!row.status" effect="dark" content="用户已被锁定" placement="top">
               <svg-icon
                 v-if="!row.status"
                 icon-class="sun"
-                style="color:slategrey;font-size:20px;"
+                style="color:slategrey;font-size:20px;cursor: pointer;"
+                @click.stop="changeSingleStatus(row)"
               />
             </el-tooltip>
           </template>
         </vxe-table-column>
         <vxe-table-column title="操作">
           <template v-slot="{row,$rowIndex}">
-            <vxe-button type="text" @click="EditUsers(true,row)">编辑</vxe-button>
+            <vxe-button type="text" @click.stop="EditUsers(true,row)">编辑</vxe-button>
             <el-popover :ref="`popover-${$rowIndex}`" width="160" placement="top">
               <p>确定删除该项吗？</p>
               <div style="text-align: right; margin: 0">
@@ -94,7 +140,7 @@
                   @click="deleUsers(true,row);$refs[`popover-${$rowIndex}`].doClose()"
                 >确定</el-button>
               </div>
-              <vxe-button slot="reference" type="text">删除</vxe-button>
+              <vxe-button slot="reference" type="text" @click.stop>删除</vxe-button>
             </el-popover>
           </template>
         </vxe-table-column>
@@ -323,7 +369,8 @@
 </template>
 
 <script>
-import { getAlluser, getAlldep, changeDp, changeStatus, deleUsers, updateUsers, addNewUsers, getSearchedLength, getSeacheduser, getAllUsersLength } from '@/api/department'
+import { getTableData, getAlldep, changeDp, changeStatus,
+  deleUsers, updateUsers, addNewUsers } from '@/api/department'
 import { getRoles } from '@/api/role'
 const defaultUserInfo = {
   id: '',
@@ -342,13 +389,17 @@ export default {
       type: String,
       required: false,
       default: () => {
-        return ''
+        return 'props'
       }
     }
   },
   data() {
     return {
       tableData: [],
+      tableType: 'all',
+      property: '',
+      order: '',
+      filterName: '',
       tablePage: {
         currentPage: 1,
         pageSize: 10,
@@ -393,51 +444,46 @@ export default {
     }
   },
   watch: {
-    async search() {
+    checkedDp() {
+      this.search = this.checkedDp
+      this.getTableData()
+    },
+    tableType() {
+      this.getTableData()
+    },
+    search() {
       const search = this.$utils.toString(this.search).trim().toLowerCase()
       if (search) {
-        // console.log()
-        await this.getTotal(search)
-        await this.getSeacheduser()
-        console.log('-----search-------')
-        console.log(this.tablePage.totalResult)
+        this.tableType = 'search'
       } else {
-        console.log('---------real---------')
-        await this.getAllUsersLength()
-        await this.getAlluser()
+        this.tableType = 'all'
+        // this.getAlluser()
       }
+    },
+    order() {
+      this.tablePage.currentPage = 1
+      this.getTableData()
+    },
+    filterName() {
+      this.tablePage.currentPage = 1
+      this.getTableData()
     }
   },
   created() {
-    console.log('-----------')
-    this.getAllUsersLength()
-    this.getAlluser()
-    console.log('111111111111111111')
+    this.getTableData()
     this.getAlldep()
     this.getRoles()
   },
   methods: {
-    async getAllUsersLength() {
-      console.log('进入函数一')
-      await getAllUsersLength().then(res => {
-        console.log('函数一执行')
-        this.tablePage.totalResult = res.data
-        this.loading = true
-      })
-    },
-    getSeacheduser() {
-      getSeacheduser(this.tablePage.totalResult, this.tablePage.pageSize, this.tablePage.currentPage).then(res => {
+    async getTableData() {
+      this.loading = true
+      await getTableData(this.tableType, this.search, this.property, this.order, this.filterName, this.tablePage.pageSize, this.tablePage.currentPage).then(res => {
+        this.tablePage.totalResult = res.total
         this.tableData = res.data
         this.$nextTick(() => {
-          this.$refs.depUsers.reloadData(this.tableData)
+          this.$refs.depUsers.updateData()
+          this.loading = false
         })
-        this.loading = false
-      })
-    },
-    getTotal(search) {
-      getSearchedLength(search).then(res => {
-        this.tablePage.totalResult = res.data
-        this.loading = true
       })
     },
     getRoles() {
@@ -448,19 +494,6 @@ export default {
     getAlldep() {
       getAlldep().then(res => {
         this.depList = res.data
-      })
-    },
-    async getAlluser() {
-      console.log('函数二执行')
-      // const data = { total: this.totalResult ,pageSize:this.pageSize, }
-      console.log('现在' + this.tablePage.totalResult)
-      await getAlluser(this.tablePage.totalResult, this.tablePage.pageSize, this.tablePage.currentPage).then(res => {
-        console.log('之后' + this.tablePage.totalResult)
-        this.tableData = res.data
-        this.$nextTick(() => {
-          this.$refs.depUsers.reloadData(this.tableData)
-        })
-        this.loading = false
       })
     },
     submitInfo() {
@@ -511,17 +544,30 @@ export default {
     EditUsers(isEdit, row) {
       this.drawer = true
       this.drawerTitle = isEdit ? '编辑用户' : '新增用户'
-      console.log(row)
       if (isEdit) {
         this.userInfo = row
       } else {
         this.userInfo = Object.assign({}, defaultUserInfo)
       }
     },
+    changeSingleStatus(row) {
+      row.status = !row.status
+    },
+    sortChange({ column, property, order }) {
+      this.property = property
+      this.order = order
+      this.tableType = 'sort'
+    },
+    filterNameMethod({ column, property, values, datas, filters }) {
+      // this.tableType = 'filter'
+      // this.property = property
+      // this.filterName = datas
+      console.log('context')
+      console.log(column, property, values, datas, filters)
+    },
     showInfo(row) {
       this.userInfo = row
       this.dialogInfoVisible = true
-      console.log(row)
     },
     deleUsers(boolen, row) {
       this.$nextTick(() => {
@@ -649,11 +695,7 @@ export default {
     handlePageChange({ currentPage, pageSize }) {
       this.tablePage.currentPage = currentPage
       this.tablePage.pageSize = pageSize
-      if (this.search) {
-        this.getSeacheduser()
-      } else {
-        this.getAlluser()
-      }
+      this.getTableData()
     },
     confirm() {
       changeDp(this.changeList, this.changedDep).then(res => {
@@ -799,8 +841,13 @@ export default {
   border-radius: 0 0 21px 21px;
 }
 
+ #box-conier >>> .vxe-table--filter-wrapper{
+  z-index: 2000;
+}
+
 /* .avatar-type:hover {
   color: royalblue;
   background-color: turquoise;
 } */
 </style>
+
