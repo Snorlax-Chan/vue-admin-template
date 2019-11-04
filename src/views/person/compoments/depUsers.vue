@@ -687,6 +687,13 @@ export default {
       })
     },
     changeDep() {
+      if (this.$refs.depUsers.getSelectRecords().length === 0) {
+        return this.$message({
+          showClose: true,
+          message: '请先选中用户！',
+          type: 'warning'
+        })
+      }
       this.dialogVisible = true
       this.changedDep = []
       this.$nextTick(() => {
