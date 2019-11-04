@@ -9,7 +9,9 @@ import locale from 'element-ui/lib/locale/lang/en' // lang i18n
 import XEUtils from 'xe-utils'
 import VXEUtils from 'vxe-utils'
 import VXETable from 'vxe-table'
+import VXETablePluginElement from 'vxe-table-plugin-element'
 import 'vxe-table/lib/index.css'
+import 'vxe-table-plugin-element/dist/style.css'
 
 import '@/styles/index.scss' // global css
 
@@ -38,6 +40,7 @@ Vue.use(ElementUI, { locale })
 // Vue.prototype.$notify = avatar
 Vue.use(VXEUtils, XEUtils)
 Vue.use(VXETable)
+VXETable.use(VXETablePluginElement)
 
 Vue.config.productionTip = false
 

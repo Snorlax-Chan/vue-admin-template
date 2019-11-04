@@ -77,31 +77,28 @@
         </vxe-table-column>
         <vxe-table-column field="department" title="部门" :filters="[{ data: [] }]">
           <template v-slot:filter="{ column, context }">
-            <template v-for="(option, index) in column.filters" class="select-type">
-              <div :key="index" class="div-select-type">
-                <el-select
-                  :key="index"
-                  v-model="option.data"
-                  placeholder="请选择"
-                  multiple
-                  filterable
-                  collapse-tags
-                  clearable
-                  popper-class="filter-select"
-                  :popper-append-to-body="true"
-                  @change="context.changeOption($event, !!option.data, option)"
-                >
-                  <el-option-group v-for="group in depList" :key="group.id" :label="group.name">
-                    <el-option
-                      v-for="item in group.children"
-                      :key="item.id"
-                      :label="item.name"
-                      :value="item.id"
-                    />
-                  </el-option-group>
-                </el-select>
-              </div>
-            </template>
+            <el-select
+              v-for="(option, index) in column.filters"
+              :key="index"
+              v-model="option.data"
+              placeholder="请选择"
+              multiple
+              filterable
+              collapse-tags
+              clearable
+              popper-class="filter-select"
+              :popper-append-to-body="true"
+              @change="context.changeOption($event, !!option.data, option)"
+            >
+              <el-option-group v-for="group in depList" :key="group.id" :label="group.name">
+                <el-option
+                  v-for="item in group.children"
+                  :key="item.id"
+                  :label="item.name"
+                  :value="item.name"
+                />
+              </el-option-group>
+            </el-select>
           </template></vxe-table-column>
         <vxe-table-column field="status" title="状态" width="60">
           <template v-slot="{row}">
@@ -856,13 +853,22 @@ export default {
   border-radius: 0 0 21px 21px;
 }
 
- #box-conier >>> .vxe-table--filter-wrapper{
+ /* #box-conier >>> .vxe-table--filter-wrapper{
   z-index: 2000;
-}
+} */
 
 /* .avatar-type:hover {
   color: royalblue;
   background-color: turquoise;
+} */
+</style>
+<style >
+/* .vxe-table--filter-wrapper{
+  z-index: 2000;
+} */
+/* .filter-select{
+  z-index: 3000;
+  background-color: #54ea39;
 } */
 </style>
 
