@@ -445,8 +445,12 @@ export default {
   },
   watch: {
     checkedDp() {
-      this.search = this.checkedDp
-      this.getTableData()
+      if (this.checkedDp === '总公司') {
+        this.search = ''
+      } else {
+        this.search = this.checkedDp
+        this.getTableData()
+      }
     },
     tableType() {
       this.getTableData()
@@ -499,6 +503,7 @@ export default {
     submitInfo() {
       this.$refs.infoForm.validate(valid => {
         if (valid) {
+          this.drawer = false
           if (this.drawerTitle === '编辑用户') {
             updateUsers(this.userInfo.id, this.userInfo).then(res => {
               if (res.data === 'success') {
@@ -542,6 +547,9 @@ export default {
       })
     },
     EditUsers(isEdit, row) {
+      if (this.$refs.infoForm !== undefined) {
+        this.$refs.infoForm.resetFields()
+      }
       this.drawer = true
       this.drawerTitle = isEdit ? '编辑用户' : '新增用户'
       if (isEdit) {

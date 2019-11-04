@@ -3,49 +3,14 @@
     <el-card class="box-card" shadow="never">
       <div slot="header" class="clearfix">
         <span>组织架构</span>
-        <el-dropdown class="el-dropdown-link">
+        <el-dropdown class="el-dropdown-link" @command="handleCommand($event,[])">
           <el-button
             type="text"
           >
             <svg-icon icon-class="more" />
           </el-button>
           <el-dropdown-menu slot="dropdown">
-            <el-popover :ref="`popover-new-add`" width="360" placement="top">
-              <div style="padding-bottom: 15px;text-align: center;font-size: 18px;font-weight: 900;"><span>新增组织</span></div>
-              <el-card shadow="never">
-                <el-form :inline="true" :model="departmentInfo" class="demo-form-inline" :rules="rules" status-icon>
-                  <el-form-item label="部门名称" prop="name">
-                    <el-input v-model="departmentInfo.name" />
-                  </el-form-item>
-                  <el-form-item label="部门简介" prop="remarks">
-                    <el-input v-model="departmentInfo.remarks" type="textarea" />
-                  </el-form-item>
-                  <el-form-item label="是否启用" prop="status">
-                    <el-switch v-model="departmentInfo.status" active-color="#13ce66" inactive-color="#606266" />
-                  </el-form-item>
-                  <el-alert
-                    title="启用将开启相关功能！"
-                    type="info"
-                    width="50%"
-                    show-icon
-                  />
-                </el-form>
-              </el-card>
-              <div style="text-align: right; margin: 0">
-                <el-button
-                  type="text"
-                  size="mini"
-                  @click="$refs[`popover-new-add`].doClose()"
-                >取消</el-button>
-                <el-button
-                  type="danger"
-                  size="mini"
-                  @click="appendOrgan();$refs[`popover-new-add`].doClose();"
-                >确定</el-button>
-              </div>
-              <el-dropdown-item slot="reference"><div @click="addOrgan">添加组织</div></el-dropdown-item>
-            </el-popover>
-
+            <el-dropdown-item command="addOrgan">添加组织</el-dropdown-item>
           </el-dropdown-menu>
         </el-dropdown>
       </div>
@@ -69,83 +34,15 @@
         <vxe-table-column field="name" title="Date" tree-node>
           <template v-slot="{row}">
             {{ row.name }}
-            <el-dropdown class="el-dropdown-link">
+            <el-dropdown class="el-dropdown-link" @command="handleCommand($event,row)">
               <el-button
                 type="text"
               >
                 <svg-icon icon-class="more" />
               </el-button>
               <el-dropdown-menu slot="dropdown">
-                <el-popover :ref="`popover-${row.id}-add`" width="360" placement="top">
-                  <div style="padding-bottom: 15px;text-align: center;font-size: 18px;font-weight: 900;"><span>{{ popoverTitle }}</span></div>
-                  <el-card shadow="never">
-                    <el-form :inline="true" :model="departmentInfo" class="demo-form-inline" :rules="rules" status-icon>
-                      <el-form-item label="部门名称" prop="name">
-                        <el-input v-model="departmentInfo.name" />
-                      </el-form-item>
-                      <el-form-item label="部门简介" prop="remarks">
-                        <el-input v-model="departmentInfo.remarks" type="textarea" />
-                      </el-form-item>
-                      <el-form-item label="是否启用" prop="status">
-                        <el-switch v-model="departmentInfo.status" active-color="#13ce66" inactive-color="#606266" />
-                      </el-form-item>
-                      <el-alert
-                        title="启用将开启相关功能！"
-                        type="info"
-                        width="50%"
-                        show-icon
-                      />
-                    </el-form>
-                  </el-card>
-                  <div style="text-align: right; margin: 0">
-                    <el-button
-                      type="text"
-                      size="mini"
-                      @click="$refs[`popover-${row.id}-add`].doClose()"
-                    >取消</el-button>
-                    <el-button
-                      type="danger"
-                      size="mini"
-                      @click="$refs[`popover-${row.id}-add`].doClose();appendChild(row)"
-                    >确定</el-button>
-                  </div>
-                  <el-dropdown-item slot="reference"><span @click="addChild(true,'')">添加子部门</span></el-dropdown-item>
-                </el-popover>
-                <el-popover :ref="`popover-${row.id}-edit`" width="360" placement="top">
-                  <div style="padding-bottom: 15px;text-align: center;font-size: 18px;font-weight: 900;"><span>{{ popoverTitle }}</span></div>
-                  <el-card shadow="never">
-                    <el-form :inline="true" :model="departmentInfo" class="demo-form-inline" :rules="rules" status-icon>
-                      <el-form-item label="部门名称" prop="name">
-                        <el-input v-model="departmentInfo.name" />
-                      </el-form-item>
-                      <el-form-item label="部门简介" prop="remarks">
-                        <el-input v-model="departmentInfo.remarks" type="textarea" />
-                      </el-form-item>
-                      <el-form-item label="是否启用" prop="status">
-                        <el-switch v-model="departmentInfo.status" active-color="#13ce66" inactive-color="#606266" />
-                      </el-form-item>
-                      <el-alert
-                        title="启用将开启相关功能！"
-                        type="info"
-                        width="50%"
-                        show-icon
-                      />
-                    </el-form>
-                  </el-card>
-                  <div style="text-align: right; margin: 0">
-                    <el-button
-                      type="text"
-                      size="mini"
-                      @click="$refs[`popover-${row.id}-edit`].doClose()"
-                    >取消</el-button>
-                    <el-button
-                      type="danger"
-                      size="mini"
-                      @click="$refs[`popover-${row.id}-edit`].doClose();update(row)"
-                    >确定</el-button>
-                  </div>
-                  <el-dropdown-item slot="reference"><div @click="addChild(false,row)">修改</div></el-dropdown-item>
-                </el-popover>
+                <el-dropdown-item command="addChild">添加子部门</el-dropdown-item>
+                <el-dropdown-item command="editChild">修改</el-dropdown-item>
                 <el-popover :ref="`popover-${row.id}-dele`" width="160" placement="top">
                   <p>确定删除该项吗？</p>
                   <div style="text-align: right; margin: 0">
@@ -169,11 +66,96 @@
         </vxe-table-column>
       </vxe-table>
     </el-card>
+    <el-dialog
+      :title="popoverTitle"
+      :visible.sync="dialogOrganVisible"
+      width="30%"
+      center
+      class="dialog_type"
+    >
+      <el-card shadow="never">
+        <el-form ref="ruleForm" :inline="true" :model="departmentInfo" label-position="right" class="demo-form-inline" :rules="rules" status-icon>
+          <el-form-item label="部门名称" prop="name">
+            <el-input v-model="departmentInfo.name" />
+          </el-form-item>
+          <el-form-item label="部门简介" prop="remarks">
+            <el-input v-model="departmentInfo.remarks" type="textarea" />
+          </el-form-item>
+          <el-form-item label="分配部门角色">
+            <el-popover :ref="`popover-role`" placement="right">
+              <div style="padding-bottom: 15px;text-align: center;font-size: 18px;font-weight: 900;"><span>分配部门角色</span></div>
+              <el-card shadow="never">
+                <el-transfer
+                  v-model="departmentInfo.roles"
+                  filterable
+                  filter-placeholder="请输入城市拼音"
+                  :data="cloneRoleList"
+                  :props="{
+                    key: 'id',
+                    label: 'name'
+                  }"
+                  :titles="['系统全部角色', '该部门角色']"
+                />
+                <el-alert
+                  title="添加后数据实时更新！请在取消/确定前确认分配的角色信息！"
+                  type="info"
+                  width="50%"
+                  show-icon
+                />
+              </el-card>
+              <div style="text-align: right; margin: 0">
+                <el-button
+                  type="danger"
+                  size="mini"
+                  @click="$refs[`popover-role`].doClose();"
+                >确定</el-button>
+              </div>
+              <el-button slot="reference">点此分配部门角色</el-button>
+            </el-popover>
+          </el-form-item>
+          <el-form-item label="是否启用" prop="status">
+            <el-switch v-model="departmentInfo.status" active-color="#13ce66" />
+          </el-form-item>
+          <el-alert
+            title="启用将激活该部门！未启用将在相关页面隐去该部门！"
+            type="info"
+            width="50%"
+            show-icon
+          />
+        </el-form>
+      </el-card>
+      <div style="text-align: right; margin: 0">
+        <el-button
+          type="text"
+          size="mini"
+          @click="dialogOrganVisible = false;"
+        >取消</el-button>
+        <el-button
+          v-if="popoverTitle==='新增组织'"
+          type="danger"
+          size="mini"
+          @click="appendOrgan();"
+        >确定</el-button>
+        <el-button
+          v-if="popoverTitle==='新增子部门'"
+          type="danger"
+          size="mini"
+          @click="appendChild(tableRow);"
+        >确定</el-button>
+        <el-button
+          v-if="popoverTitle==='编辑部门'"
+          type="danger"
+          size="mini"
+          @click="update(tableRow);"
+        >确定</el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
 <script>
-import { getAlldep, appendDepChild, deleDepartment } from '@/api/department'
+import { getAlldep, appendDepChild, deleDepartment, updateDepInfo } from '@/api/department'
+import { getRoles } from '@/api/role'
 import { deepClone } from '@/utils'
 
 const defaultDpInfo = {
@@ -184,7 +166,8 @@ const defaultDpInfo = {
   content: '',
   numbers: '',
   status: '',
-  remarks: ''
+  remarks: '',
+  roles: []
 }
 export default {
   name: 'DepMenu',
@@ -194,16 +177,21 @@ export default {
       search: '',
       departmentInfo: Object.assign({}, defaultDpInfo),
       popoverTitle: '',
+      tableRow: {},
+      dialogOrganVisible: false,
+      realRoleList: [],
+      cloneRoleList: [],
+      depRoles: [],
       rules: {
         name: [
           { required: true, message: '请输入部门', trigger: 'blur' },
           { min: 2, max: 25, message: '长度在 2 到 25 个字符', trigger: 'blur' }
         ],
         remarks: [
-          { required: false, message: '简介介绍部门职能', trigger: 'blur' }
+          { required: true, message: '简介介绍部门职能', trigger: 'blur' }
         ],
         status: [
-          { type: 'boolen', required: false, message: '请确认是否启用该部门', trigger: 'change' }
+          { required: false, message: '请确认是否启用该部门', trigger: 'change' }
         ]
       }
     }
@@ -222,84 +210,156 @@ export default {
   },
   created() {
     this.getAlldep()
+    this.getRoles()
   },
   methods: {
+    getRoles() {
+      getRoles().then(res => {
+        this.realRoleList = res.data
+        this.cloneRoleList = deepClone(this.realRoleList)
+      })
+    },
     getAlldep() {
       getAlldep().then(res => {
         this.tableData = res.data
       })
     },
     addChild(isAdd, row) {
+      if (this.$refs.ruleForm !== undefined) {
+        this.$refs.ruleForm.resetFields()
+      }
       if (isAdd) {
         this.popoverTitle = '新增子部门'
         this.departmentInfo = Object.assign({}, defaultDpInfo)
+        this.dialogOrganVisible = true
       } else {
         this.popoverTitle = '编辑部门'
         this.departmentInfo = row
+        this.dialogOrganVisible = true
       }
     },
     appendOrgan() {
-      this.departmentInfo.id = (Math.ceil(Math.random() * 100)) * 3
-      this.tableData.push(this.departmentInfo)
-      this.$nextTick(() => {
-        appendDepChild('', this.departmentInfo).then(res => {
-          if (res.data === 'success') {
-            this.$message({
-              showClose: true,
-              message: '新增部门成功！',
-              type: 'success'
+      this.$refs.ruleForm.validate((valid) => {
+        if (valid) {
+          this.dialogOrganVisible = false
+          this.departmentInfo.id = (Math.ceil(Math.random() * 100)) * 3
+          this.tableData.push(this.departmentInfo)
+          this.$nextTick(() => {
+            appendDepChild('', this.departmentInfo).then(res => {
+              if (res.data === 'success') {
+                this.$message({
+                  showClose: true,
+                  message: '新增部门成功！',
+                  type: 'success'
+                })
+                this.$refs.depMenu.updateData()
+              }
+            }).catch(e => {
+              this.$message({
+                showClose: true,
+                message: '新增部门失败,错误：' + e,
+                type: 'error'
+              })
             })
-            this.$refs.depMenu.reloadData(this.tableData)
-          }
-        }).catch(e => {
+          })
+        } else {
           this.$message({
             showClose: true,
-            message: '新增部门失败,错误：' + e,
+            message: '请检查输入信息是否正确',
             type: 'error'
           })
-        })
+        }
       })
-      console.log(this.departmentInfo.id)
     },
     addOrgan() {
+      if (this.$refs.ruleForm !== undefined) {
+        this.$refs.ruleForm.resetFields()
+      }
       this.departmentInfo = Object.assign({}, defaultDpInfo)
+      this.dialogOrganVisible = true
+      this.popoverTitle = '新增组织'
+    },
+    handleCommand(command, row) {
+      this.tableRow = row
+      if (command === 'addOrgan') {
+        this.addOrgan()
+      } else if (command === 'addChild') {
+        this.addChild(true, '')
+      } else if (command === 'editChild') {
+        this.addChild(false, row)
+      }
     },
     appendChild(row) {
-      this.departmentInfo.id = row.id + '-1'
-      console.log(this.departmentInfo)
-      if (row.children) {
-        row.children.push(this.departmentInfo)
-      } else {
-        row.children = []
-        row.children.push(this.departmentInfo)
-      }
-      this.$nextTick(() => {
-        appendDepChild(row.id, this.departmentInfo).then(res => {
-          if (res.data === 'success') {
-            this.$message({
-              showClose: true,
-              message: '新增部门成功！',
-              type: 'success'
-            })
-            this.$refs.depMenu.reloadData(this.tableData)
+      this.$refs.ruleForm.validate((valid) => {
+        if (valid) {
+          this.dialogOrganVisible = false
+          this.departmentInfo.id = row.id + '-1'
+          if (row.children) {
+            row.children.push(this.departmentInfo)
+          } else {
+            row.children = []
+            row.children.push(this.departmentInfo)
           }
-        }).catch(e => {
+          this.$nextTick(() => {
+            appendDepChild(row.id, this.departmentInfo).then(res => {
+              if (res.data === 'success') {
+                this.$message({
+                  showClose: true,
+                  message: '新增部门成功！',
+                  type: 'success'
+                })
+                this.$refs.depMenu.updateData()
+              }
+            }).catch(e => {
+              this.$message({
+                showClose: true,
+                message: '新增部门失败,错误：' + e,
+                type: 'error'
+              })
+            })
+          })
+        } else {
           this.$message({
             showClose: true,
-            message: '新增部门失败,错误：' + e,
+            message: '请检查输入信息是否正确',
             type: 'error'
           })
-        })
+        }
       })
     },
     update(row) {
-      row.name = this.departmentInfo.name
-      row.remarks = this.departmentInfo.remarks
-      row.status = this.departmentInfo.status
-      this.$message({
-        showClose: true,
-        message: '部门信息修改成功！',
-        type: 'success'
+      this.$refs.ruleForm.validate((valid) => {
+        if (valid) {
+          this.dialogOrganVisible = false
+          row.name = this.departmentInfo.name
+          row.remarks = this.departmentInfo.remarks
+          row.status = this.departmentInfo.status
+          row.roles = this.departmentInfo.roles
+          this.$nextTick(() => {
+            updateDepInfo(row.id, this.departmentInfo).then(res => {
+              if (res.data === 'success') {
+                this.$message({
+                  showClose: true,
+                  message: '部门信息更新成功！',
+                  type: 'success'
+                })
+                this.$refs.depMenu.updateData()
+              }
+            }).catch(e => {
+              this.$message({
+                showClose: true,
+                message: '部门信息更新失败！错误：' + e,
+                type: 'error'
+              })
+            })
+          })
+        } else {
+          this.$message({
+            showClose: true,
+            message: '请检查输入信息是否正确',
+            type: 'error'
+          })
+        }
       })
     },
     deleDp(row) {
@@ -314,7 +374,7 @@ export default {
               type: 'success'
             })
             this.tableData = this.deleRow(row, tableData)
-            this.$refs.depMenu.reloadData(this.tableData)
+            this.$refs.depMenu.updateData()
           }
         }).catch(e => {
           this.$message({
@@ -382,4 +442,9 @@ export default {
   color: black;
 }
 
+.dialog_type >>> .el-dialog__header {
+  padding: 10px 10px 10px;
+  border-bottom: #cac4c4 1px solid;
+  font-weight: bolder;
+}
 </style>

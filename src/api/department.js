@@ -87,19 +87,10 @@ export function deleDepartment(departmentId) {
   })
 }
 
-// export function getSearchedLength(stringInfo) {
-//   return request({
-//     url: '/department/getSearchedLength',
-//     method: 'post',
-//     data: { stringInfo: stringInfo }
-//   })
-// }
-
-// export function changeSort(property, order) {
-//   return request({
-//     url: '/showDep/changeSort',
-//     method: 'post',
-//     data: { property: property, order: order }
-//   })
-// }
-
+export function updateDepInfo(depId, depInfo) {
+  return request({
+    url: '/department/updateDepInfo',
+    method: 'post',
+    data: { depId: depId, depInfo: depInfo }
+  })
+}

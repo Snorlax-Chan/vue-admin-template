@@ -11,6 +11,7 @@ const departmentList = [{
   numbers: '50',
   status: true,
   remarks: '',
+  roles: ['1', '2'],
   children: [{
     id: '2',
     key: 'Personnal department',
@@ -19,7 +20,8 @@ const departmentList = [{
     content: '13858965234',
     numbers: '21',
     status: true,
-    remarks: ''
+    remarks: '',
+    roles: ['2']
   },
   {
     id: '3',
@@ -29,7 +31,8 @@ const departmentList = [{
     content: '138246546534',
     numbers: '50',
     status: true,
-    remarks: ''
+    remarks: '',
+    roles: ['2']
   },
   {
     id: '4',
@@ -39,7 +42,8 @@ const departmentList = [{
     content: '13858965234',
     numbers: '30',
     status: true,
-    remarks: ''
+    remarks: '',
+    roles: ['2']
   }
   ]
 }]
@@ -236,6 +240,18 @@ export default [
   // dele department child
   {
     url: '/department/deleDepartment',
+    type: 'post',
+    response: res => {
+      return {
+        code: 20000,
+        data: 'success'
+      }
+    }
+  },
+
+  // update depInfo
+  {
+    url: '/department/updateDepInfo',
     type: 'post',
     response: res => {
       return {
