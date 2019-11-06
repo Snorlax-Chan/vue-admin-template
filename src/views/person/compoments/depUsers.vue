@@ -25,6 +25,11 @@
                 <svg-icon icon-class="trash" />
               </el-button>
             </el-tooltip>
+            <el-tooltip effect="dark" content="批量上传" placement="top">
+              <el-button circle class="icon-type" @click="updateUsers">
+                <svg-icon icon-class="upload-1" />
+              </el-button>
+            </el-tooltip>
             <el-tooltip effect="dark" content="新增用户" placement="top">
               <el-button round class="add-type" @click="EditUsers(false,'')">
                 <svg-icon icon-class="pluss-2" style="font-size:30px;vertical-align: middle;" />
@@ -45,7 +50,7 @@
         resizable
         :data="tableData"
         show-overflow
-        height="460"
+        height="400"
         size="mini"
         row-id="id"
         :loading="loading"
@@ -62,7 +67,16 @@
         <vxe-table-column field="name" title="姓名" sortable :filters="[{ data: '' }]">
           <template v-slot:filter="{ column, context }">
             <template v-for="(option, index) in column.filters">
-              <el-input :key="index" v-model="option.data" class="my-input" type="type" placeholder="按回车确认筛选" @input="context.changeOption($event, !!option.data, option)" @keyup.enter.native="context.confirmFilter()" /></template>
+              <el-input
+                :key="index"
+                v-model="option.data"
+                class="my-input"
+                type="type"
+                placeholder="按回车确认筛选"
+                @input="context.changeOption($event, !!option.data, option)"
+                @keyup.enter.native="context.confirmFilter()"
+              />
+            </template>
           </template>
           <template v-slot="{row}">
             <el-button type="text" @click.stop="showInfo(row)">{{ row.name }}</el-button>
@@ -72,7 +86,16 @@
         <vxe-table-column field="content" title="联系方式" sortable :filters="[{ data: '' }]">
           <template v-slot:filter="{ column, context }">
             <template v-for="(option, index) in column.filters">
-              <el-input :key="index" v-model="option.data" class="my-input" type="type" placeholder="按回车确认筛选" @input="context.changeOption($event, !!option.data, option)" @keyup.enter.native="context.confirmFilter()" /></template>
+              <el-input
+                :key="index"
+                v-model="option.data"
+                class="my-input"
+                type="type"
+                placeholder="按回车确认筛选"
+                @input="context.changeOption($event, !!option.data, option)"
+                @keyup.enter.native="context.confirmFilter()"
+              />
+            </template>
           </template>
         </vxe-table-column>
         <vxe-table-column field="department" title="部门" :filters="[{ data: [] }]">
@@ -99,7 +122,8 @@
                 />
               </el-option-group>
             </el-select>
-          </template></vxe-table-column>
+          </template>
+        </vxe-table-column>
         <vxe-table-column field="status" title="状态" width="60">
           <template v-slot="{row}">
             <el-tooltip v-if="row.status" effect="dark" content="用户正常" placement="top">
@@ -362,12 +386,47 @@
         </div>
       </el-card>
     </el-drawer>
+    <el-dialog
+      title="用户批量上传"
+      :visible.sync="dialogUpdateVisible"
+      width="33%"
+      center
+      class="dialog_type"
+    >
+      <el-card shadow="never">
+        <el-upload
+          ref="updateFile"
+          class="upload-demo"
+          drag
+          action
+          :http-request="customUpload"
+          :auto-upload="false"
+          multiple
+        >
+          <i class="el-icon-upload" />
+          <div class="el-upload__text">
+            将文件拖到此处，或
+            <em>点击上传</em>
+          </div>
+          <div slot="tip" class="el-upload__tip">请下载对应模版文件，按需填写后上传</div>
+        </el-upload>
+      </el-card>
+      <div style="text-align: right; margin-top: 5px;">
+        <el-button
+          type="info"
+          :loading="updateLoding"
+          size="small"
+          round
+          @click="$refs.updateFile.submit();"
+        >确定</el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
 <script>
 import { getTableData, getAlldep, changeDp, changeStatus,
-  deleUsers, updateUsers, addNewUsers } from '@/api/department'
+  deleUsers, updateUsers, addNewUsers, fileUpdate } from '@/api/department'
 import { getRoles } from '@/api/role'
 const defaultUserInfo = {
   id: '',
@@ -406,6 +465,8 @@ export default {
       search: '',
       dialogVisible: false,
       dialogInfoVisible: false,
+      dialogUpdateVisible: false,
+      updateLoding: false,
       drawer: false,
       visible: false,
       drawerTitle: '',
@@ -543,6 +604,37 @@ export default {
         }
       })
     },
+    customUpload(file) {
+      this.updateLoding = true
+      console.log(file)
+      fileUpdate(file).then(res => {
+        if (res.data === 'success') {
+          this.$message({
+            showClose: true,
+            message: '文件上传成功！',
+            type: 'success'
+          })
+          this.updateLoding = false
+          this.dialogUpdateVisible = false
+        } else {
+          this.updateLoding = false
+          this.$message({
+            showClose: true,
+            message: '提交失败，请检查文件后重新提交',
+            type: 'error'
+          })
+          this.dialogUpdateVisible = false
+        }
+      }).catch(e => {
+        this.updateLoding = false
+        this.$message({
+          showClose: true,
+          message: '提交失败，错误信息：' + e,
+          type: 'error'
+        })
+        this.dialogUpdateVisible = false
+      })
+    },
     EditUsers(isEdit, row) {
       if (this.$refs.infoForm !== undefined) {
         this.$refs.infoForm.resetFields()
@@ -567,12 +659,13 @@ export default {
       this.tableType = 'filter'
       this.property = property
       this.filterName = datas
-      console.log('context')
-      console.log(column, property, values, datas, filters)
     },
     showInfo(row) {
       this.userInfo = row
       this.dialogInfoVisible = true
+    },
+    updateUsers() {
+      this.dialogUpdateVisible = true
     },
     deleUsers(boolen, row) {
       this.$nextTick(() => {
@@ -853,7 +946,7 @@ export default {
   border-radius: 0 0 21px 21px;
 }
 
- /* #box-conier >>> .vxe-table--filter-wrapper{
+/* #box-conier >>> .vxe-table--filter-wrapper{
   z-index: 2000;
 } */
 

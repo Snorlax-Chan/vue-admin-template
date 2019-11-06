@@ -259,5 +259,20 @@ export default [
         data: 'success'
       }
     }
+  },
+
+  // update file
+  {
+    url: '/department/fileUpdate',
+    type: 'post',
+    response: res => {
+      const param = res.body
+      console.log(res)
+      console.log(param)
+      return {
+        code: 20000,
+        data: 'success'
+      }
+    }
   }
 ]

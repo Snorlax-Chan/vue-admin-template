@@ -94,3 +94,18 @@ export function updateDepInfo(depId, depInfo) {
     data: { depId: depId, depInfo: depInfo }
   })
 }
+
+export function fileUpdate(fileobj) {
+  const param = new FormData()
+  param.append('files', fileobj.file)
+  console.log(fileobj.file)
+  console.log(param.getAll('files'))
+  return request({
+    url: '/department/fileUpdate',
+    method: 'post',
+    headers: {
+      'Content-Type': 'multipart/form-data;charset=UTF-8'
+    },
+    data: param
+  })
+}
