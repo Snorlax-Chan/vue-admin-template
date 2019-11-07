@@ -103,9 +103,20 @@ export function fileUpdate(fileobj) {
   return request({
     url: '/department/fileUpdate',
     method: 'post',
-    headers: {
-      'Content-Type': 'multipart/form-data;charset=UTF-8'
-    },
     data: param
+  })
+}
+
+export function downloadUsersModel(fileobj) {
+  return request({
+    url: '/department/downloadUsersModel',
+    method: 'get'
+  })
+}
+
+export function exportTable() {
+  return request({
+    url: '/department/exportTable',
+    method: 'get'
   })
 }

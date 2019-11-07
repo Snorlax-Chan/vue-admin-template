@@ -5,6 +5,11 @@
         <vxe-toolbar id="toolbar-type">
           <template v-slot:buttons>
             <span class="textType">成员({{ tablePage.totalResult }})</span>
+            <el-tooltip effect="dark" content="新增用户" placement="top">
+              <el-button round class="add-type" @click="EditUsers(false,'')">
+                <svg-icon icon-class="new-add" style="font-size:30px;vertical-align: middle;" />
+              </el-button>
+            </el-tooltip>
             <el-tooltip effect="dark" content="批量调换部门" placement="top">
               <el-button circle class="icon-type" @click="changeDep">
                 <svg-icon icon-class="pingyi" />
@@ -26,16 +31,51 @@
               </el-button>
             </el-tooltip>
             <el-tooltip effect="dark" content="批量上传" placement="top">
-              <el-button circle class="icon-type" @click="updateUsers">
+              <el-button circle class="icon-type" @click="uploadUsers">
                 <svg-icon icon-class="upload-1" />
               </el-button>
             </el-tooltip>
-            <el-tooltip effect="dark" content="新增用户" placement="top">
-              <el-button round class="add-type" @click="EditUsers(false,'')">
-                <svg-icon icon-class="pluss-2" style="font-size:30px;vertical-align: middle;" />
-                <span style="padding: 0px 14px 0px 0px;">新增</span>
+            <el-popover
+              :ref="`popover-exportTable`"
+              width="260"
+              placement="top"
+              style="margin-left:10px;"
+            >
+              <el-divider content-position="left">
+                <span style="font-size: 16px;font-weight: 500;">导出数据</span>
+              </el-divider>
+              <el-form ref="infoForm" :model="exportFormat" label-width="80px" status-icon>
+                <el-form-item label="文件名">
+                  <el-input v-model="exportFormat.filename" placeholder="请输入文件名" clearable />
+                </el-form-item>
+                <el-form-item label="导出类型">
+                  <el-select v-model="exportFormat.type" clearable placeholder="请选择">
+                    <el-option
+                      v-for="item in typeList"
+                      :key="item.lable"
+                      :label="item.title"
+                      :value="item.lable"
+                    />
+                  </el-select>
+                </el-form-item>
+              </el-form>
+              <div style="text-align: right; margin: 0">
+                <el-button
+                  type="text"
+                  size="mini"
+                  @click="$refs[`popover-exportTable`].doClose()"
+                >取消</el-button>
+                <el-button
+                  type="danger"
+                  size="mini"
+                  :loading="exportloading"
+                  @click="exportTable();$refs[`popover-exportTable`].doClose()"
+                >导出</el-button>
+              </div>
+              <el-button slot="reference" circle class="icon-type">
+                <svg-icon icon-class="cloud-download" />
               </el-button>
-            </el-tooltip>
+            </el-popover>
             <el-input
               v-model="search"
               placeholder="输入姓名/部门等搜索"
@@ -62,7 +102,7 @@
         @filter-change="filterNameMethod"
         @sort-change="sortChange"
       >
-        <vxe-table-column type="selection" width="60" />
+        <vxe-table-column type="checkbox" width="60" />
         <vxe-table-column type="index" title="序号" width="60" />
         <vxe-table-column field="name" title="姓名" sortable :filters="[{ data: '' }]">
           <template v-slot:filter="{ column, context }">
@@ -176,7 +216,14 @@
       />
     </el-card>
 
-    <el-dialog title="批量调换部门" :visible.sync="dialogVisible" width="38%" :before-close="handleClose">
+    <el-dialog
+      title="批量调换部门"
+      :visible.sync="dialogVisible"
+      width="38%"
+      :before-close="handleClose"
+      class="dialog_type"
+      center
+    >
       <div>
         <el-select
           v-model="changeList"
@@ -229,7 +276,7 @@
       <el-row>
         <el-col style="text-align:center">
           <el-avatar>
-            <svg-icon icon-class="user-2" style="font-size: 40px;" />
+            <svg-icon icon-class="user-2" style="font-size: 40px;" :src="userInfo.avatar" />
           </el-avatar>
         </el-col>
       </el-row>
@@ -322,9 +369,27 @@
       <el-card shadow="never">
         <div class="avatar-type">
           <span style="display: block;width: fit-content;">
-            <el-avatar :size="50">
-              <svg-icon icon-class="user-2" style="font-size: 50px;" />
-            </el-avatar>
+            <el-popover
+              :ref="`popover-avatar`"
+              width="208"
+              placement="left"
+              popper-class="popper-avatar-type"
+            >
+              <el-upload
+                action
+                list-type="picture-card"
+                :limit="1"
+                :auto-upload="false"
+                :on-change="handlePictureCardChange"
+                :on-remove="handleRemove"
+                class="upload-type"
+              >
+                <i class="el-icon-plus" />
+              </el-upload>
+              <el-avatar slot="reference" :size="50" :src="dialogImageUrl">
+                <svg-icon icon-class="user-2" style="font-size: 50px;" />
+              </el-avatar>
+            </el-popover>
           </span>
         </div>
         <div style="padding:0px 20px 20px 20px ;" class="drawerinIput-type">
@@ -412,6 +477,7 @@
         </el-upload>
       </el-card>
       <div style="text-align: right; margin-top: 5px;">
+        <el-button type="text" @click="downloadUsersModel">点此下载批量上传用户模版</el-button>
         <el-button
           type="info"
           :loading="updateLoding"
@@ -425,8 +491,8 @@
 </template>
 
 <script>
-import { getTableData, getAlldep, changeDp, changeStatus,
-  deleUsers, updateUsers, addNewUsers, fileUpdate } from '@/api/department'
+import { getTableData, getAlldep, changeDp, changeStatus, exportTable,
+  deleUsers, updateUsers, addNewUsers, fileUpdate, downloadUsersModel } from '@/api/department'
 import { getRoles } from '@/api/role'
 const defaultUserInfo = {
   id: '',
@@ -436,7 +502,13 @@ const defaultUserInfo = {
   status: '',
   sex: '',
   email: '',
-  content: ''
+  content: '',
+  avatar: ''
+}
+const defaultExportFormat = {
+  filename: '',
+  type: '',
+  data: []
 }
 
 export default {
@@ -462,6 +534,7 @@ export default {
         totalResult: 0
       },
       loading: false,
+      exportloading: false,
       search: '',
       dialogVisible: false,
       dialogInfoVisible: false,
@@ -474,7 +547,11 @@ export default {
       changedDep: [],
       depList: [],
       rolesList: [],
+      dialogImageUrl: '',
+      dialogImageVisible: false,
+      exportFormat: Object.assign({}, defaultExportFormat),
       userInfo: Object.assign({}, defaultUserInfo),
+      typeList: [{ title: 'CSV格式(*.csv)', lable: 'csv' }, { title: '网页(*.html)', lable: 'html' }, { title: 'XML数据(*.xml)', lable: 'xml' }, { title: '文本文件(*.txt)', lable: 'txt' }],
       rules: {
         name: [
           { required: true, message: '请输入用户名', trigger: 'blur' },
@@ -558,6 +635,47 @@ export default {
         this.depList = res.data
       })
     },
+    exportTable() {
+      this.exportloading = true
+      this.$nextTick(() => {
+        exportTable().then(res => {
+          this.exportFormat.data = res.data
+          this.exportFormat.filename = this.exportFormat.filename || '员工信息表'
+          this.exportFormat.type = this.exportFormat.type || 'csv'
+          this.exportloading = false
+          // 此方法也为导出方法
+          // this.$refs.depUsers.openExport()
+          this.$refs.depUsers.exportData({
+            data: this.exportFormat.data,
+            filename: this.exportFormat.filename,
+            type: this.exportFormat.type,
+            original: true
+          })
+          this.$message({
+            showClose: true,
+            message: '导出成功！',
+            type: 'success'
+          })
+        })
+      })
+    },
+    handleRemove(file, fileList) {
+      this.dialogImageUrl = ''
+      this.userInfo.avatar = ''
+    },
+    handlePictureCardChange(file) {
+      this.userInfo.avatar = file
+      this.dialogImageUrl = file.url
+    },
+    downloadUsersModel() {
+      downloadUsersModel().then(res => {
+        const a = document.createElement('a')
+        a.href = res.data
+        a.download = '批量下载模版'
+        a.click()
+        a.remove()
+      })
+    },
     submitInfo() {
       this.$refs.infoForm.validate(valid => {
         if (valid) {
@@ -606,7 +724,6 @@ export default {
     },
     customUpload(file) {
       this.updateLoding = true
-      console.log(file)
       fileUpdate(file).then(res => {
         if (res.data === 'success') {
           this.$message({
@@ -664,14 +781,13 @@ export default {
       this.userInfo = row
       this.dialogInfoVisible = true
     },
-    updateUsers() {
+    uploadUsers() {
       this.dialogUpdateVisible = true
     },
     deleUsers(boolen, row) {
       this.$nextTick(() => {
         const data = []
         if (boolen) {
-          console.log(row)
           this.$refs.depUsers.remove(row).then(res => {
             // eslint-disable-next-line no-unused-vars
             data.push(row.id)
@@ -794,7 +910,6 @@ export default {
           data.push(j.id)
         }
         this.changeList = data
-        console.log(this.changeList)
       })
     },
     handlePageChange({ currentPage, pageSize }) {
@@ -872,14 +987,21 @@ export default {
 .vxe-toolbar >>> .add-type {
   background: #606266;
   color: papayawhip;
-  padding: 5px 2px 2px 2px;
+  padding: 5px 5px 5px 5px;
   vertical-align: top;
 }
-.vxe-toolbar >>> .add-type:hover,
+.vxe-toolbar >>> .add-type:hover {
+  color: #54ea39;
+  border-color: #d1d6dc;
+  background-color: #8d929c;
+}
+
 .vxe-toolbar >>> .add-type:focus {
   color: #54ea39;
   border-color: #d1d6dc;
   background-color: #8d929c;
+  transform: rotate(360deg);
+  transition: 1.5s;
 }
 
 .vxe-toolbar >>> .icon-type:focus,
@@ -946,22 +1068,20 @@ export default {
   border-radius: 0 0 21px 21px;
 }
 
-/* #box-conier >>> .vxe-table--filter-wrapper{
-  z-index: 2000;
-} */
+.upload-type >>> .el-upload-list--picture-card .el-upload-list__item {
+  width: 78px;
+  height: 78px;
+}
 
-/* .avatar-type:hover {
-  color: royalblue;
-  background-color: turquoise;
-} */
+.upload-type >>> .el-upload--picture-card {
+  width: 78px;
+  height: 78px;
+  line-height: 78px;
+}
 </style>
 <style >
-/* .vxe-table--filter-wrapper{
-  z-index: 2000;
-} */
-/* .filter-select{
-  z-index: 3000;
-  background-color: #54ea39;
-} */
+.popper-avatar-type {
+  background-color: #b9b9b9;
+}
 </style>
 

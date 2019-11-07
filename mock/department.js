@@ -61,6 +61,10 @@ const AllDepUsers = Mock.mock({
     date: '@date'
   }]
 })
+
+const mockimage = Mock.mock({
+  image: Mock.Random.image('200x100', '#ffcc33', '#FFF', 'png', '!')
+})
 // let searchList = []
 let tableData = deepClone(AllDepUsers.AllDepUsers)
 
@@ -272,6 +276,30 @@ export default [
       return {
         code: 20000,
         data: 'success'
+      }
+    }
+  },
+
+  // download Users Model file
+  {
+    url: '/department/downloadUsersModel',
+    type: 'get',
+    response: res => {
+      return {
+        code: 20000,
+        data: mockimage
+      }
+    }
+  },
+
+  // export tableInfo
+  {
+    url: '/department/exportTable',
+    type: 'get',
+    response: res => {
+      return {
+        code: 20000,
+        data: tableData
       }
     }
   }

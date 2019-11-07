@@ -8,7 +8,7 @@
     :select-config="{checkRowKeys: checkedRoutes}"
     @select-change="selectChangeEvent"
   >
-    <vxe-table-column type="selection" title="全选" width="80" tree-node />
+    <vxe-table-column type="checkbox" title="全选" width="80" tree-node />
     <vxe-table-column field="title" title="列表" tree-node />
     <vxe-table-column type="expand" width="60">
       <template v-slot="{ row, rowIndex }">

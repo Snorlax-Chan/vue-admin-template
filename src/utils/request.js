@@ -2,7 +2,7 @@ import axios from 'axios'
 import { MessageBox, Message } from 'element-ui'
 import store from '@/store'
 import { getToken } from '@/utils/auth'
-import qs from 'qs'
+// import qs from 'qs'
 
 // create an axios instance
 const service = axios.create({
@@ -10,18 +10,18 @@ const service = axios.create({
   // withCredentials: true, // send cookies when cross-domain requests
   timeout: 5000, // request timeout
   // 允许跨域
-  withCredentials: true,
-  transformRequest: [function(data, headers) {
-    if (headers['Content-Type'] === 'application/x-www-form-urlencoded') {
-      // 把一个参数对象格式化为一个字符串
-      return qs.stringify(data)
-    } else if (headers['Content-Type'] === 'multipart/form-data;charset=UTF-8') {
-      return data
-    } else {
-      headers['Content-Type'] = 'application/json'
-    }
-    return JSON.stringify(data)
-  }]
+  withCredentials: true
+  // transformRequest: [function(data, headers) {
+  //   if (headers['Content-Type'] === 'application/x-www-form-urlencoded') {
+  //     // 把一个参数对象格式化为一个字符串
+  //     return qs.stringify(data)
+  //   } else if (headers['Content-Type'] === 'multipart/form-data;charset=UTF-8') {
+  //     return data
+  //   } else {
+  //     headers['Content-Type'] = 'application/json'
+  //   }
+  //   return JSON.stringify(data)
+  // }]
 })
 
 // request interceptor
