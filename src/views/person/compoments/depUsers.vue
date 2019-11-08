@@ -112,8 +112,9 @@
                 v-model="option.data"
                 class="my-input"
                 type="type"
+                clearable
                 placeholder="按回车确认筛选"
-                @input="context.changeOption($event, !!option.data, option)"
+                @input="watchInput($event,context);context.changeOption($event, !!option.data, option)"
                 @keyup.enter.native="context.confirmFilter()"
               />
             </template>
@@ -131,8 +132,9 @@
                 v-model="option.data"
                 class="my-input"
                 type="type"
+                clearable
                 placeholder="按回车确认筛选"
-                @input="context.changeOption($event, !!option.data, option)"
+                @input="watchInput($event,context);context.changeOption($event, !!option.data, option)"
                 @keyup.enter.native="context.confirmFilter()"
               />
             </template>
@@ -142,16 +144,18 @@
           <template v-slot:filter="{ column, context }">
             <el-select
               v-for="(option, index) in column.filters"
+              ref="dp-filter-select"
               :key="index"
               v-model="option.data"
               placeholder="请选择"
               multiple
               filterable
               collapse-tags
-              clearable
               popper-class="filter-select"
               :popper-append-to-body="true"
-              @change="context.changeOption($event, !!option.data, option)"
+              :default-first-option="true"
+              @change="context.changeOption($event, !!option.data, option);watchInput($event,context);"
+              @visible-change="confirmDepFilter($event,context)"
             >
               <el-option-group v-for="group in depList" :key="group.id" :label="group.name">
                 <el-option
@@ -634,6 +638,16 @@ export default {
       getAlldep().then(res => {
         this.depList = res.data
       })
+    },
+    watchInput(value, context) {
+      if (value.length === 0) {
+        context.resetFilter()
+      }
+    },
+    confirmDepFilter(callback, context) {
+      if (!callback) {
+        context.confirmFilter()
+      }
     },
     exportTable() {
       this.exportloading = true
