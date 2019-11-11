@@ -88,7 +88,7 @@
       <vxe-table
         ref="depUsers"
         resizable
-        :data="tableData"
+        :data="cloneTable"
         show-overflow
         height="400"
         size="mini"
@@ -276,6 +276,7 @@
       width="35%"
       center
       class="dialog_type"
+      @closed="closeDrawer"
     >
       <el-row>
         <el-col style="text-align:center">
@@ -353,13 +354,7 @@
       </div>
       <span slot="footer" class="dialog-footer" />
     </el-dialog>
-    <el-drawer
-      :visible.sync="drawer"
-      direction="rtl"
-      center
-      :before-close="handleClose"
-      width="25%"
-    >
+    <el-drawer :visible.sync="drawer" direction="rtl" center width="25%" @closed="closeDrawer">
       <el-row slot="title" style="border-bottom:1px;">
         <el-col :span="4">
           <el-button type="success" round size="small" @click="submitInfo">提交</el-button>
@@ -390,7 +385,7 @@
               >
                 <i class="el-icon-plus" />
               </el-upload>
-              <el-avatar slot="reference" :size="50" :src="dialogImageUrl">
+              <el-avatar slot="reference" :size="50" :src="userInfo.avatar">
                 <svg-icon icon-class="user-2" style="font-size: 50px;" />
               </el-avatar>
             </el-popover>
@@ -498,6 +493,7 @@
 import { getTableData, getAlldep, changeDp, changeStatus, exportTable,
   deleUsers, updateUsers, addNewUsers, fileUpdate, downloadUsersModel } from '@/api/department'
 import { getRoles } from '@/api/role'
+import { deepClone } from '@/utils'
 const defaultUserInfo = {
   id: '',
   name: '',
@@ -507,7 +503,8 @@ const defaultUserInfo = {
   sex: '',
   email: '',
   content: '',
-  avatar: ''
+  avatar: '',
+  file: ''
 }
 const defaultExportFormat = {
   filename: '',
@@ -551,7 +548,6 @@ export default {
       changedDep: [],
       depList: [],
       rolesList: [],
-      dialogImageUrl: '',
       dialogImageVisible: false,
       exportFormat: Object.assign({}, defaultExportFormat),
       userInfo: Object.assign({}, defaultUserInfo),
@@ -568,7 +564,7 @@ export default {
           { type: 'email', required: true, message: '请输入正确的邮箱地址', trigger: 'blur' }
         ],
         sex: [
-          { required: true, message: '请选择性别', trigger: 'change' }
+          { required: true, message: '请选择性别', trigger: 'blur' }
         ],
         department: [
           { required: true, message: '请分配部门', trigger: 'blur' }
@@ -580,6 +576,11 @@ export default {
           { required: false, message: '未激活状态！', trigger: 'change' }
         ]
       }
+    }
+  },
+  computed: {
+    cloneTable() {
+      return deepClone(this.tableData)
     }
   },
   watch: {
@@ -597,8 +598,12 @@ export default {
     search() {
       const search = this.$utils.toString(this.search).trim().toLowerCase()
       if (search) {
+        this.$refs.depUsers.clearFilter()
+        this.$refs.depUsers.clearSort()
         this.tableType = 'search'
       } else {
+        this.$refs.depUsers.clearFilter()
+        this.$refs.depUsers.clearSort()
         this.tableType = 'all'
         // this.getAlluser()
       }
@@ -674,12 +679,12 @@ export default {
       })
     },
     handleRemove(file, fileList) {
-      this.dialogImageUrl = ''
+      this.userInfo.file = ''
       this.userInfo.avatar = ''
     },
     handlePictureCardChange(file) {
-      this.userInfo.avatar = file
-      this.dialogImageUrl = file.url
+      this.userInfo.file = file
+      this.userInfo.avatar = file.url
     },
     downloadUsersModel() {
       downloadUsersModel().then(res => {
@@ -765,6 +770,9 @@ export default {
         })
         this.dialogUpdateVisible = false
       })
+    },
+    closeDrawer() {
+      this.userInfo = Object.assign({}, defaultUserInfo)
     },
     EditUsers(isEdit, row) {
       if (this.$refs.infoForm !== undefined) {

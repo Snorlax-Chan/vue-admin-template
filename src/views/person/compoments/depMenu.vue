@@ -3,9 +3,10 @@
     <el-card class="box-card" shadow="never">
       <div slot="header" class="clearfix">
         <span>组织架构</span>
-        <el-dropdown class="el-dropdown-link" @command="handleCommand($event,[])">
+        <el-dropdown class="el-dropdown-link" trigger="click" @command="handleCommand($event,[])">
           <el-button
             type="text"
+            @click.stop=""
           >
             <svg-icon icon-class="more" />
           </el-button>
@@ -34,9 +35,10 @@
         <vxe-table-column field="name" title="Date" tree-node>
           <template v-slot="{row}">
             {{ row.name }}
-            <el-dropdown class="el-dropdown-link" @command="handleCommand($event,row)">
+            <el-dropdown class="el-dropdown-link" trigger="click" @command="handleCommand($event,row)">
               <el-button
                 type="text"
+                @click.stop=""
               >
                 <svg-icon icon-class="more" />
               </el-button>
@@ -72,6 +74,7 @@
       width="30%"
       center
       class="dialog_type"
+      @closed="closeDialog"
     >
       <el-card shadow="never">
         <el-form ref="ruleForm" :inline="true" :model="departmentInfo" label-position="right" class="demo-form-inline" :rules="rules" status-icon>
@@ -223,6 +226,9 @@ export default {
       getAlldep().then(res => {
         this.tableData = res.data
       })
+    },
+    closeDialog() {
+      this.departmentInfo = Object.assign({}, defaultDpInfo)
     },
     addChild(isAdd, row) {
       if (this.$refs.ruleForm !== undefined) {
