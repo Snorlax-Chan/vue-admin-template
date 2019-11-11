@@ -48,8 +48,9 @@ const departmentList = [{
   ]
 }]
 
-const AllDepUsers = Mock.mock({
-  'AllDepUsers|108': [{
+const AllDepUsers = []
+for (let i = 0; i < 2; i++) {
+  AllDepUsers.push(Mock.mock({
     id: '@id',
     name: '@cname',
     'role|1': [['经理'], ['经理', '超管'], ['经理', '超管', '人事']],
@@ -59,14 +60,14 @@ const AllDepUsers = Mock.mock({
     email: '@email',
     content: /^1[0-9]{10}$/,
     date: '@date'
-  }]
-})
+  }))
+}
 
 const mockimage = Mock.mock({
   image: Mock.Random.image('200x100', '#ffcc33', '#FFF', 'png', '!')
 })
 // let searchList = []
-let tableData = deepClone(AllDepUsers.AllDepUsers)
+let tableData = deepClone(AllDepUsers)
 
 function sortByName(order) {
   if (order === 'asc') {
@@ -88,7 +89,7 @@ function searchUserInfo(filterName) {
   if (filterName) {
     // const filterRE = new RegExp(filterName, 'gi')
     const searchProps = ['id', 'name', 'role', 'department', 'status', 'email', 'content', 'date']
-    const rest = AllDepUsers.AllDepUsers.filter(item => searchProps.some(key => XEUtils.toString(item[key]).toLowerCase().indexOf(filterName) > -1))
+    const rest = AllDepUsers.filter(item => searchProps.some(key => XEUtils.toString(item[key]).toLowerCase().indexOf(filterName) > -1))
     return rest
   }
 }
@@ -97,7 +98,7 @@ function filter(property, filterName) {
   if (filterName) {
     const searchProps = [property]
     console.log(searchProps)
-    const rest = AllDepUsers.AllDepUsers.filter(item => searchProps.some(key => XEUtils.toString(item[key]).toLowerCase().indexOf(filterName) > -1))
+    const rest = AllDepUsers.filter(item => searchProps.some(key => XEUtils.toString(item[key]).toLowerCase().indexOf(filterName) > -1))
     return rest
   }
 }
@@ -139,7 +140,7 @@ export default [
       console.log(tableType, stringInfo, property, order, filterName, pageSize, currentPage)
       if (tableType === 'all') {
         console.log('---all------')
-        tableData = deepClone(AllDepUsers.AllDepUsers)
+        tableData = deepClone(AllDepUsers)
         data = mockUserInfo(pageSize, currentPage)
       } else if (tableType === 'search') {
         console.log('---search------')

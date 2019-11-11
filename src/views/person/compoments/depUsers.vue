@@ -69,7 +69,7 @@
                   type="danger"
                   size="mini"
                   :loading="exportloading"
-                  @click="exportTable();$refs[`popover-exportTable`].doClose()"
+                  @click="exportTable()"
                 >导出</el-button>
               </div>
               <el-button slot="reference" circle class="icon-type">
@@ -147,7 +147,7 @@
               ref="dp-filter-select"
               :key="index"
               v-model="option.data"
-              placeholder="请选择"
+              placeholder="选择内容后双击搜索"
               multiple
               filterable
               collapse-tags
@@ -551,7 +551,7 @@ export default {
       dialogImageVisible: false,
       exportFormat: Object.assign({}, defaultExportFormat),
       userInfo: Object.assign({}, defaultUserInfo),
-      typeList: [{ title: 'CSV格式(*.csv)', lable: 'csv' }, { title: '网页(*.html)', lable: 'html' }, { title: 'XML数据(*.xml)', lable: 'xml' }, { title: '文本文件(*.txt)', lable: 'txt' }],
+      typeList: [{ title: 'CSV格式(*.csv)', lable: 'csv' }, { title: '网页(*.html)', lable: 'html' }, { title: 'XML数据(*.xml)', lable: 'xml' }, { title: '文本文件(*.txt)', lable: 'txt' }, { title: 'Excel文件(*.xlsx)', lable: 'xlsx' }],
       rules: {
         name: [
           { required: true, message: '请输入用户名', trigger: 'blur' },
@@ -660,20 +660,34 @@ export default {
         exportTable().then(res => {
           this.exportFormat.data = res.data
           this.exportFormat.filename = this.exportFormat.filename || '员工信息表'
-          this.exportFormat.type = this.exportFormat.type || 'csv'
-          this.exportloading = false
+          this.exportFormat.type = this.exportFormat.type || 'xlsx'
           // 此方法也为导出方法
           // this.$refs.depUsers.openExport()
-          this.$refs.depUsers.exportData({
-            data: this.exportFormat.data,
-            filename: this.exportFormat.filename,
-            type: this.exportFormat.type,
-            original: true
-          })
-          this.$message({
-            showClose: true,
-            message: '导出成功！',
-            type: 'success'
+          // this.$refs.depUsers.exportData({
+          //   data: this.exportFormat.data,
+          //   filename: this.exportFormat.filename,
+          //   type: this.exportFormat.type,
+          //   original: true
+          // })
+          console.log('--------------')
+          console.log(this.exportFormat.data)
+          import('@/vendor/Export2Excel').then(excel => {
+            const tHeader = ['id', 'name', 'role', 'department', 'status', 'sex', 'email', 'content', 'date']
+            const data = res.data
+            excel.export_json_to_excel({
+              header: tHeader, // 表头 必填
+              data, // 具体数据 必填
+              filename: this.exportFormat.filename, // 非必填
+              autoWidth: true, // 非必填
+              bookType: this.exportFormat.type // 非必填
+            })
+            this.$message({
+              showClose: true,
+              message: '导出成功！',
+              type: 'success'
+            })
+            this.exportloading = false
+            this.$refs.popover - exportTable.doClose()
           })
         })
       })
