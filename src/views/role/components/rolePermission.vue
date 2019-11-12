@@ -42,12 +42,13 @@
             @select-change="selectChangeEvent"
             @select-all="selectAllEvent"
           >
-            <vxe-table-column type="selection" title="全选" width="80" tree-node />
+            <vxe-table-column type="checkbox" title="全选" width="80" tree-node />
             <vxe-table-column field="title" title="列表" tree-node />
             <vxe-table-column type="expand" width="60">
               <template v-slot="{ row, rowIndex }">
                 <el-checkbox-group
                   v-model="row.checked"
+                  :expand-config="{expandAll: true}"
                   @change="handleCheckedChange(rowIndex,row)"
                 >
                   <el-checkbox
@@ -95,10 +96,10 @@ export default {
     return {
       role: Object.assign({}, defaultRole),
       routes: [],
+      serviceRoutes: [],
       rolesList: [],
       dialogVisible: false,
       dialogType: 'new',
-      checkStrictly: false,
       defaultProps: {
         children: 'children',
         label: 'title'
@@ -250,9 +251,12 @@ export default {
       getcheckedArr(routes)：检查树形表格中checkbox选中项
       若要实现路由无限层级必须重写该方法
     */
-    getchecked(routes, selected) {
+    getchecked(routes, selected = []) {
       const checkedRoute = []
       routes.forEach(route => {
+        if (selected.length === 0) {
+          route.checked = []
+        }
         // eslint-disable-next-line no-unused-vars
         for (const i of selected) {
           if (route.path === i.path) {
@@ -267,7 +271,11 @@ export default {
               }
               const res = []
               i.children.forEach(item => {
-                res.push(item.name)
+                route.children.forEach(j => {
+                  if (item.name === j.name) {
+                    res.push(item.name)
+                  }
+                })
               })
               route.checked = res
             } else {
@@ -299,7 +307,6 @@ export default {
       const res = await getRoutes()
       this.serviceRoutes = res.data
       this.routes = this.generateRoutes(res.data)
-      this.realRoutes = this.generateRoutes(res.data)
     },
     async getRoles() {
       const res = await getRoles()
@@ -362,9 +369,10 @@ export default {
         // 此处必须用deepclone
         // 原因js传参（若参数为引用类型时，即数组对象等，会复制一份该引用的地址）
         // 所以在修改参数传入的引用类型对象时，若对该对象进行修改，因为该对象在内存中的地址相同，修改会同步
-        this.selected = deepClone(this.routes)
+        const realRoutes = deepClone(this.routes)
+        this.selected = this.getchecked(realRoutes)
         if (this.$refs.treetable) {
-          this.$refs.treetable.reloadData(this.routes)
+          this.$refs.treetable.updateData()
         }
         this.dialogType = 'new'
         this.dialogVisible = true
@@ -373,19 +381,16 @@ export default {
     handleEdit(scope) {
       this.dialogType = 'edit'
       this.dialogVisible = true
-      this.checkStrictly = true
       this.selected = []
       this.checkedRoute = []
       this.$nextTick(() => {
         this.role = deepClone(scope.row)
         const routes = this.generateRoutes(this.role.routes)
-        console.log(routes)
         const realRoutes = deepClone(this.routes)
         // this.$refs.tree.setCheckedNodes(this.generateArr(routes))
         this.selected = this.getchecked(realRoutes, this.generateArr(routes))
-        this.$refs.treetable.reloadData(this.selected)
+        this.$refs.treetable.updateData()
         // set checked state of a node not affects its father and child nodes
-        this.checkStrictly = false
       })
     },
     handleDelete({ $index, row }) {

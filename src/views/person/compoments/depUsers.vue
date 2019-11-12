@@ -654,6 +654,11 @@ export default {
         context.confirmFilter()
       }
     },
+    formatJson(filterVal, jsonData) {
+      return jsonData.map(v => filterVal.map(j => {
+        return v[j]
+      }))
+    },
     exportTable() {
       this.exportloading = true
       this.$nextTick(() => {
@@ -672,8 +677,9 @@ export default {
           console.log('--------------')
           console.log(this.exportFormat.data)
           import('@/vendor/Export2Excel').then(excel => {
-            const tHeader = ['id', 'name', 'role', 'department', 'status', 'sex', 'email', 'content', 'date']
-            const data = res.data
+            const defaultHeader = ['id', 'name', 'role', 'department', 'status', 'sex', 'email', 'content', 'date']
+            const tHeader = ['序号', '姓名', '职业', '部门', '状态', '性别', '邮箱', '联系方式', '日期']
+            const data = this.formatJson(defaultHeader, res.data)
             excel.export_json_to_excel({
               header: tHeader, // 表头 必填
               data, // 具体数据 必填
@@ -687,7 +693,7 @@ export default {
               type: 'success'
             })
             this.exportloading = false
-            this.$refs.popover - exportTable.doClose()
+            this.$refs[`popover-exportTable`].doClose()
           })
         })
       })

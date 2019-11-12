@@ -49,7 +49,7 @@ const departmentList = [{
 }]
 
 const AllDepUsers = []
-for (let i = 0; i < 2; i++) {
+for (let i = 0; i < 108; i++) {
   AllDepUsers.push(Mock.mock({
     id: '@id',
     name: '@cname',
