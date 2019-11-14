@@ -1,5 +1,5 @@
 import Mock from 'mockjs'
-import { roles, asyncRoutes } from '../user'
+import { roles, asyncRoutes, test } from '../user'
 
 // 角色对应路由的按钮权限
 const roleEditPMS = [
@@ -7,7 +7,8 @@ const roleEditPMS = [
     id: '1',
     key: 'admin',
     name: '超级管理员',
-    department: 'Super',
+    description: '我是一个超级管理员，拥有所有权限',
+    routes: asyncRoutes,
     routesCount: [{
       id: '1',
       name: 'Dashboard',
@@ -77,7 +78,8 @@ const roleEditPMS = [
     id: '2',
     key: 'editor',
     name: '用户',
-    department: '人事部',
+    description: '我是一个普通角色，只有特定权限',
+    routes: test,
     routesCount: [{
       id: '1',
       name: 'Dashboard',
@@ -120,7 +122,8 @@ export default [
     response: {
       code: 20000,
       data: {
-        key: Mock.mock('@integer(300, 5000)')
+        id: Mock.mock('@integer(300, 5000)'),
+        key: Mock.Random.character('lower')
       }
     }
   },

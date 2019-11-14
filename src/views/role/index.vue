@@ -3,14 +3,13 @@
     <el-tabs type="border-card">
       <el-tab-pane label="角色数据权限" style="height:100vh;">
         <el-row>
-          <el-col :span="4">
+          <el-col :span="6">
             <table-menu @handle-current-change="showRolePMS" />
           </el-col>
-          <el-row type="flex" justify="center">
-            <el-col :span="20">
-              <role-table :routes="rolePMSlist" />
-            </el-col>
-          </el-row>
+          <el-col :span="18">
+            <role-pms :assign="rolePMSlist" />
+            <!-- <role-table :routes="rolePMSlist" /> -->
+          </el-col>
         </el-row>
       </el-tab-pane>
       <el-tab-pane label="角色页面权限" style="height:100vh;">
@@ -21,19 +20,21 @@
 </template>
 
 <script>
-import RoleTable from './components/roleTable'
+// import RoleTable from './components/roleTable'
+import RolePms from './components/rolePMS'
 import RolePermission from './components/rolePermission'
 import TableMenu from './components/tableMenu'
 export default {
   name: 'Role',
   components: {
-    RoleTable,
+    // RoleTable,
+    RolePms,
     RolePermission,
     TableMenu
   },
   data() {
     return {
-      rolePMSlist: []
+      rolePMSlist: {}
     }
   },
   created() {
@@ -41,7 +42,16 @@ export default {
   },
   methods: {
     showRolePMS(val) {
-      this.rolePMSlist = val.routesCount
+      console.log(val)
+      const data = {
+        id: 'test',
+        key: 'test',
+        name: 'null',
+        description: '角色列表中无数据，请新建一个！',
+        routes: [],
+        routesCount: []
+      }
+      this.rolePMSlist = val || data
     }
   }
 }

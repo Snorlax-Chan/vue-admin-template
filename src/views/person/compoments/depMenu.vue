@@ -26,6 +26,7 @@
       <vxe-table
         ref="depMenu"
         resizable
+        :auto-resize="true"
         :tree-config="{children: 'children', expandAll: true}"
         :data="list"
         :show-header="false"
@@ -240,7 +241,7 @@ export default {
         this.dialogOrganVisible = true
       } else {
         this.popoverTitle = '编辑部门'
-        this.departmentInfo = row
+        this.departmentInfo = deepClone(row)
         this.dialogOrganVisible = true
       }
     },

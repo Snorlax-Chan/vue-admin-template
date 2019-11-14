@@ -88,6 +88,7 @@
       <vxe-table
         ref="depUsers"
         resizable
+        :auto-resize="true"
         :data="cloneTable"
         show-overflow
         height="400"
@@ -801,7 +802,7 @@ export default {
       this.drawer = true
       this.drawerTitle = isEdit ? '编辑用户' : '新增用户'
       if (isEdit) {
-        this.userInfo = row
+        this.userInfo = deepClone(row)
       } else {
         this.userInfo = Object.assign({}, defaultUserInfo)
       }
@@ -1056,7 +1057,7 @@ export default {
   float: right;
   width: 220px;
 }
-.vxe-toolbar >>> .el-input__inner {
+.input-type >>> .el-input__inner {
   float: right;
   width: 220px;
   border-radius: 30px;

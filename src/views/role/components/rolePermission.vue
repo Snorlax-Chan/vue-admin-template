@@ -254,9 +254,7 @@ export default {
     getchecked(routes, selected = []) {
       const checkedRoute = []
       routes.forEach(route => {
-        if (selected.length === 0) {
-          route.checked = []
-        }
+        route.checked = []
         // eslint-disable-next-line no-unused-vars
         for (const i of selected) {
           if (route.path === i.path) {
@@ -273,12 +271,15 @@ export default {
               i.children.forEach(item => {
                 route.children.forEach(j => {
                   if (item.name === j.name) {
-                    res.push(item.name)
+                    res.push(j.name)
                   }
                 })
               })
               route.checked = res
+              console.log('---------haschildren-----------')
+              console.log(res)
             } else {
+              console.log('-----no---------')
               checkedRoute.push(i.name)
             }
           }
@@ -388,7 +389,9 @@ export default {
         const routes = this.generateRoutes(this.role.routes)
         const realRoutes = deepClone(this.routes)
         // this.$refs.tree.setCheckedNodes(this.generateArr(routes))
-        this.selected = this.getchecked(realRoutes, this.generateArr(routes))
+        this.selected = this.getchecked(realRoutes, routes)
+        console.log('-----selected----')
+        console.log(this.selected)
         this.$refs.treetable.updateData()
         // set checked state of a node not affects its father and child nodes
       })
@@ -438,8 +441,11 @@ export default {
     async confirmRole() {
       const isEdit = this.dialogType === 'edit'
       const checkedNames = this.checkedRoute.concat(this.getcheckedArr(this.selected))
+      console.log('checkedname' + checkedNames)
       // const checkedKeys = this.$refs.tree.getCheckedKeys()
       this.role.routes = this.generateTree(deepClone(this.serviceRoutes), checkedNames)
+      console.log('----上传前-----')
+      console.log(this.role)
       if (isEdit) {
         await updateRole(this.role.key, this.role)
         for (let index = 0; index < this.rolesList.length; index++) {
