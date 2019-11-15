@@ -38,7 +38,7 @@
                 </el-select>
               </el-form-item>
               <el-alert
-                title="新角色权限可复制已存在角色！也可自定义，请确认后跳转！"
+                title="新角色权限可复制已存在角色！也可自定义，请在详情页设置！"
                 type="info"
                 show-icon
                 :closable="false"
@@ -189,16 +189,19 @@ export default {
   methods: {
     clonePMS(item) {
       this.currentRow.routes = deepClone(item.routes)
-      this.currentRow.routes = deepClone(item.routesCount)
+      this.currentRow.routesCount = deepClone(item.routesCount)
     },
     addRole() {
       addRole(this.currentRow).then(res => {
         this.currentRow.id = res.data.id
-        this.currentRow.key = res.data.key
-      })
-      this.tableData.push(this.currentRow)
-      this.$nextTick(() => {
-        this.$refs.singleTable.setCurrentRow(this.tableData[this.tableData.length - 1])
+        this.currentRow.key = res.data.keys
+        if (this.currentRow.routesCount.length === 0) {
+          this.currentRow.routesCount = res.data.routesCount
+        }
+        this.tableData.push(this.currentRow)
+        this.$nextTick(() => {
+          this.$refs.singleTable.setCurrentRow(this.tableData[this.tableData.length - 1])
+        })
       })
     },
     newRole() {

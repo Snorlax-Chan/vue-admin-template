@@ -62,13 +62,13 @@ export const asyncRoutes = [
         path: 'menu1',
         component: 'nested/menu1',
         name: 'Menu1',
-        meta: { title: 'Menu1' }
+        meta: { title: '菜单一' }
       },
       {
         path: 'menu2',
         component: 'nested/menu2',
         name: 'Menu2',
-        meta: { title: 'menu2' }
+        meta: { title: '菜单二' }
       }
     ]
   },

@@ -42,7 +42,6 @@ export default {
   },
   methods: {
     showRolePMS(val) {
-      console.log(val)
       const data = {
         id: 'test',
         key: 'test',

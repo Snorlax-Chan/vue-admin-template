@@ -7,11 +7,16 @@
             <span>详情页</span>
           </div>
           <el-scrollbar style="height: 70vh;">
-            <div style="font-size:20px;"><svg-icon icon-class="role" style="margin-right: 10px;font-size:25px;" />{{ roleInfo.name }}</div>
-            <div style="color: lightslategray;font-size: 15px; padding: 16px 5px 16px 16px;">
-              {{ roleInfo.description }}
+            <div style="font-size:20px;">
+              <svg-icon icon-class="role" />
+              {{ roleInfo.name }}
             </div>
-            <el-divider content-position="left"><svg-icon icon-class="page" style="margin-right: 10px;font-size:18px;" />页面权限</el-divider>
+            <div
+              style="color: lightslategray;font-size: 15px; padding: 16px 5px 16px 16px;"
+            >{{ roleInfo.description }}</div>
+            <el-divider content-position="left">
+              <svg-icon icon-class="page" style="margin-right: 10px;font-size:18px;" />页面权限
+            </el-divider>
             <div style="padding: 5px 0 18px 0;">
               <el-checkbox
                 v-model="checkAll"
@@ -31,8 +36,22 @@
                       @change="handleCheckChange($event,item)"
                     >&nbsp;</el-checkbox>
                     <span style="font-size:16px;">{{ item.title }}</span>
+                    <el-tooltip
+                      v-if="!item.children"
+                      effect="dark"
+                      content="设置按钮权限"
+                      placement="bottom-start"
+                    >
+                      <el-button type="text" @click.stop="showButtomPMS(item.name)">
+                        <span class="icon-type">
+                          <svg-icon icon-class="setting-2" />
+                        </span>
+                      </el-button>
+                    </el-tooltip>
                   </template>
-                  <span v-if="!item.children"><svg-icon icon-class="notify" style="margin: 0 15px 0 26px;font-size:18px;" />此页面无二级页面！</span>
+                  <span v-if="!item.children">
+                    <svg-icon icon-class="notify" style="margin: 0 15px 0 26px;font-size:18px;" />此页面无二级页面！
+                  </span>
                   <div v-else>
                     <el-checkbox-group v-model="item.checked">
                       <el-checkbox
@@ -41,8 +60,16 @@
                         :label="itemchild.name"
                         @click.stop.native
                         @change="handleGroupCheckChange($event,item)"
-                      >{{ itemchild.title }}  <el-button type="text"><span><svg-icon icon-class="buttom" /></span></el-button></el-checkbox>
-
+                      >
+                        {{ itemchild.title }}
+                        <el-tooltip effect="dark" content="设置按钮权限" placement="bottom-start">
+                          <el-button type="text" @click.stop="showButtomPMS(itemchild.name)">
+                            <span class="icon-type">
+                              <svg-icon icon-class="setting-2" />
+                            </span>
+                          </el-button>
+                        </el-tooltip>
+                      </el-checkbox>
                     </el-checkbox-group>
                   </div>
                 </el-collapse-item>
@@ -51,18 +78,75 @@
           </el-scrollbar>
         </el-card>
       </el-col>
-      <el-col :span="7">
-        <el-card shadow="never">
-          <div slot="header">操作</div>
-          <el-alert
-            title="点击下方按钮保存！"
-            type="info"
-            show-icon
-            :closable="false"
-          />
-          <el-button type="success" style="margin: 10px 0px 0px 0px;padding: 12px 80px 12px 80px;" :loading="isloading" @click="confirmRole">提交</el-button>
-        </el-card>
-      </el-col>
+      <transition name="el-zoom-in-top">
+        <el-col v-if="!isbuttomPMS" :span="7">
+          <el-card shadow="never">
+            <div slot="header">操作</div>
+            <el-alert title="点击下方按钮保存！" type="info" show-icon :closable="false" />
+            <el-button
+              type="success"
+              style="margin: 10px 0px 0px 0px;padding: 12px 80px 12px 80px;"
+              :loading="isloading"
+              @click="confirmRole"
+            >提交</el-button>
+          </el-card>
+        </el-col>
+      </transition>
+      <transition name="el-zoom-in-bottom">
+        <el-col v-if="isbuttomPMS" :span="7">
+          <el-card shadow="never">
+            <div style="font-size:20px;">
+              <svg-icon icon-class="page" />
+              {{ buttomPMS.title }}
+              <span style="font-size: 5px;color: silver;margin-left: 5px;">页面名称</span>
+            </div>
+            <div
+              style="color: lightslategray;font-size: 15px; padding: 16px 5px 16px 16px;"
+            >此处管理已有按钮权限</div>
+            <el-divider content-position="left">
+              <svg-icon icon-class="setting-2" style="margin-right: 10px;font-size:18px;" />按钮权限
+            </el-divider>
+            <span v-if="(buttomPMS.realBPMS.length === 0)">
+              <svg-icon
+                icon-class="notify"
+                style="margin: 0 10px 0 5px;font-size:18px;font-size:15px;"
+              />此页面无已存在按钮！
+            </span>
+            <div v-else>
+              <el-checkbox
+                v-model="buttomPMS.checkAll"
+                :indeterminate="isBtmIndeterminate"
+                style="padding: 0 20px 5px 0;"
+                @change="handleBtmCheckAllChange"
+              >全选</el-checkbox>
+              <el-checkbox-group v-model="buttomPMS.hasBPMS" style="display:inline;">
+                <el-checkbox
+                  v-for="itbm in buttomPMS.realBPMS"
+                  :key="itbm.id"
+                  :label="itbm.name"
+                  @change="handleBtmCheckedChange(itbm.name)"
+                >{{ itbm.title }}</el-checkbox>
+              </el-checkbox-group>
+            </div>
+            <el-button
+              v-if="(buttomPMS.realBPMS.length !== 0)"
+              type="success"
+              style="margin: 15px 0px 0px;padding: 2px 80px;font-size: 30px;"
+              @click="confirmBtm"
+            >
+              <svg-icon icon-class="arrow-right-3" />
+            </el-button>
+            <el-button
+              v-else
+              type="success"
+              style="margin: 15px 0px 0px;padding: 2px 80px;font-size: 30px;"
+              @click="isbuttomPMS=false;"
+            >
+              <svg-icon icon-class="arrow-right-3" />
+            </el-button>
+          </el-card>
+        </el-col>
+      </transition>
     </el-row>
   </div>
 </template>
@@ -85,8 +169,11 @@ export default {
       activeNames: ['1'],
       checkAll: false,
       isIndeterminate: false,
+      isBtmIndeterminate: false,
+      isbuttomPMS: false,
       isloading: false,
       roleInfo: [],
+      buttomPMS: {},
       selected: [],
       checkedRoute: [],
       serviceRoutes: []
@@ -98,7 +185,10 @@ export default {
     },
     roleInfo() {
       const routes = deepClone(this.roleInfo.routes)
-      const data = this.generateRoutes(routes)
+      let data = []
+      if (routes) {
+        data = this.generateRoutes(routes)
+      }
       const realRoutes = this.generateRoutes(deepClone(this.serviceRoutes))
       this.selected = this.getchecked(realRoutes, data)
     },
@@ -122,6 +212,41 @@ export default {
     async getRoutes() {
       const res = await getRoutes()
       this.serviceRoutes = res.data
+    },
+    confirmBtm() {
+      this.roleInfo.routesCount = this.roleInfo.routesCount.filter(item => {
+        return item.name !== this.buttomPMS.name
+      })
+      this.roleInfo.routesCount.push(this.buttomPMS)
+      this.isbuttomPMS = false
+    },
+    handleBtmCheckAllChange() {
+      const list = []
+      this.buttomPMS.realBPMS.forEach(item => {
+        list.push(item.name)
+      })
+      this.buttomPMS.hasBPMS = this.buttomPMS.checkAll ? list : []
+    },
+    handleBtmCheckedChange(ischecked, name) {
+      console.log(this.buttomPMS.hasBPMS)
+      if (this.buttomPMS.hasBPMS.length === this.buttomPMS.realBPMS.length) {
+        this.buttomPMS.checkAll = true
+        this.isBtmIndeterminate = false
+      } else if (this.buttomPMS.hasBPMS.length === 0) {
+        this.isBtmIndeterminate = false
+        this.buttomPMS.checkAll = false
+      } else {
+        this.isBtmIndeterminate = true
+        this.buttomPMS.checkAll = false
+      }
+    },
+    showButtomPMS(name) {
+      this.isbuttomPMS = true
+      // console.log(this.roleInfo, this.roleInfo.routesCount, name)
+      const data = deepClone(this.roleInfo.routesCount)
+      this.buttomPMS = data.filter(item => {
+        return item.name === name
+      })[0]
     },
     confirmRole() {
       this.isloading = true
@@ -245,7 +370,6 @@ export default {
         if (route.children && onlyOneShowingChild && !route.alwaysShow) {
           route = onlyOneShowingChild
         }
-
         const data = {
           path: path.resolve(basePath, route.path),
           title: route.meta && route.meta.title,
@@ -323,7 +447,22 @@ export default {
 </script>
 
 <style  scoped>
-.box-card >>> .el-card__header{
+.box-card >>> .el-card__header {
   background-color: whitesmoke;
+}
+.icon-type {
+  color: silver;
+  font-size: 18px;
+  margin-left: 5px;
+}
+
+.icon-type:hover {
+  color: slategray;
+  cursor: pointer;
+}
+
+.box-card-buttom >>> .el-card__header {
+  background-color: #67c23a;
+  color: white;
 }
 </style>
