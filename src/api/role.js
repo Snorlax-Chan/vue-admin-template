@@ -51,3 +51,10 @@ export function getRoleEditPMS(roles) {
     data: roles
   })
 }
+
+export function getdefaultRole() {
+  return request({
+    url: `/role/defaultRole`,
+    method: 'get'
+  })
+}

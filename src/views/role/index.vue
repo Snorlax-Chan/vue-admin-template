@@ -42,15 +42,9 @@ export default {
   },
   methods: {
     showRolePMS(val) {
-      const data = {
-        id: 'test',
-        key: 'test',
-        name: 'null',
-        description: '角色列表中无数据，请新建一个！',
-        routes: [],
-        routesCount: []
+      if (val) {
+        this.rolePMSlist = val
       }
-      this.rolePMSlist = val || data
     }
   }
 }

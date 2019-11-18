@@ -143,8 +143,9 @@
 </template>
 
 <script>
-import { getRoleAllEditPMS, updateRole, addRole } from '@/api/role'
+import { getRoleAllEditPMS, updateRole, addRole, getdefaultRole } from '@/api/role'
 import { deepClone } from '@/utils'
+import searchEvent from './SearchEvent'
 const defaultRole = {
   id: '',
   key: '',
@@ -158,6 +159,7 @@ export default {
     return {
       tableData: [],
       roleAllPMS: [],
+      defaultRole: {},
       routeName: '',
       currentRow: Object.assign({}, defaultRole),
       search: '',
@@ -175,7 +177,15 @@ export default {
   },
   watch: {
   },
+  mounted() {
+    searchEvent.$on('reCurrentRow', () => {
+      this.$nextTick(() => {
+        this.$refs.singleTable.setCurrentRow()
+      })
+    })
+  },
   created() {
+    this.getdefaultRole()
     getRoleAllEditPMS().then(res => {
       this.tableData = deepClone(res.data)
       this.roleAllPMS = deepClone(res.data)
@@ -187,6 +197,11 @@ export default {
     })
   },
   methods: {
+    getdefaultRole() {
+      getdefaultRole().then(res => {
+        this.defaultRole = res.data
+      })
+    },
     clonePMS(item) {
       this.currentRow.routes = deepClone(item.routes)
       this.currentRow.routesCount = deepClone(item.routesCount)
@@ -238,17 +253,21 @@ export default {
       })
     },
     deleRole(row) {
-      this.currentRow = Object.assign({}, defaultRole)
-      this.tableData = this.tableData.filter(item => {
-        return item.id !== row.id
-      })
       this.$nextTick(() => {
+        this.$refs.singleTable.setCurrentRow()
+        this.tableData = this.tableData.filter(item => {
+          return item.id !== row.id
+        })
         this.$refs.singleTable.setCurrentRow(this.tableData[0])
       })
     },
     handleCurrentChange(val) {
-      this.currentRow = deepClone(val)
-      this.$emit('handle-current-change', val)
+      if (!val) {
+        this.currentRow = deepClone(this.defaultRole)
+      } else {
+        this.currentRow = deepClone(val)
+      }
+      this.$emit('handle-current-change', this.currentRow)
     }
   }
 }

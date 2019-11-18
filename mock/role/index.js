@@ -179,86 +179,93 @@ const roleEditPMS = [
   }
 ]
 
-const defaultRoutesCount = [{
-  id: '1',
-  name: 'Dashboard',
-  title: '首页',
-  checkAll: false,
-  hasBPMS: [],
-  realBPMS: []
-},
-{
-  id: '2',
-  name: 'Person',
-  title: '人员管理',
-  checkAll: false,
-  hasBPMS: [],
-  realBPMS: []
-},
-{
-  id: '3',
-  name: 'Role',
-  title: '角色权限',
-  checkAll: false,
-  hasBPMS: [],
-  realBPMS: [{
-    id: '2-1',
-    name: 'NewRole',
-    title: '新建角色'
+const defaultRole = {
+  id: '2352',
+  key: 'test',
+  name: '默认角色',
+  description: '这是一个默认角色',
+  routes: [],
+  routesCount: [{
+    id: '1',
+    name: 'Dashboard',
+    title: '首页',
+    checkAll: false,
+    hasBPMS: [],
+    realBPMS: []
   },
   {
-    id: '2-2',
-    name: 'EditRole',
-    title: '编辑角色'
+    id: '2',
+    name: 'Person',
+    title: '人员管理',
+    checkAll: false,
+    hasBPMS: [],
+    realBPMS: []
   },
   {
-    id: '2-3',
-    name: 'DeleRole',
-    title: '删除角色'
+    id: '3',
+    name: 'Role',
+    title: '角色权限',
+    checkAll: false,
+    hasBPMS: [],
+    realBPMS: [{
+      id: '2-1',
+      name: 'NewRole',
+      title: '新建角色'
+    },
+    {
+      id: '2-2',
+      name: 'EditRole',
+      title: '编辑角色'
+    },
+    {
+      id: '2-3',
+      name: 'DeleRole',
+      title: '删除角色'
+    }
+    ]
+  },
+  {
+    id: '4',
+    name: 'Form',
+    title: '表格',
+    checkAll: false,
+    hasBPMS: [],
+    realBPMS: []
+  },
+  {
+    id: '5',
+    name: 'Nested',
+    title: '扩展',
+    checkAll: false,
+    hasBPMS: [],
+    realBPMS: []
+  },
+  {
+    id: '6',
+    name: 'Menu1',
+    title: '菜单一',
+    checkAll: false,
+    hasBPMS: [],
+    realBPMS: []
+  },
+  {
+    id: '7',
+    name: 'Menu2',
+    title: '菜单二',
+    checkAll: false,
+    hasBPMS: [],
+    realBPMS: []
+  },
+  {
+    id: '8',
+    name: 'External',
+    title: '外链',
+    checkAll: false,
+    hasBPMS: [],
+    realBPMS: []
   }
   ]
-},
-{
-  id: '4',
-  name: 'Form',
-  title: '表格',
-  checkAll: false,
-  hasBPMS: [],
-  realBPMS: []
-},
-{
-  id: '5',
-  name: 'Nested',
-  title: '扩展',
-  checkAll: false,
-  hasBPMS: [],
-  realBPMS: []
-},
-{
-  id: '6',
-  name: 'Menu1',
-  title: '菜单一',
-  checkAll: false,
-  hasBPMS: [],
-  realBPMS: []
-},
-{
-  id: '7',
-  name: 'Menu2',
-  title: '菜单二',
-  checkAll: false,
-  hasBPMS: [],
-  realBPMS: []
-},
-{
-  id: '8',
-  name: 'External',
-  title: '外链',
-  checkAll: false,
-  hasBPMS: [],
-  realBPMS: []
 }
-]
 export default [
   // mock get all routes form server
   {
@@ -291,7 +298,7 @@ export default [
     response: config => {
       let routesCount = {}
       if (config.body.routesCount.length === 0) {
-        routesCount = defaultRoutesCount
+        routesCount = defaultRole.routesCount
       }
       return {
         code: 20000,
@@ -325,6 +332,16 @@ export default [
       data: {
         status: 'success'
       }
+    }
+  },
+
+  // get default Role
+  {
+    url: '/role/defaultRole',
+    type: 'get',
+    response: {
+      code: 20000,
+      data: defaultRole
     }
   },
 

@@ -26,7 +26,7 @@
             </div>
             <el-checkbox-group v-model="checkedRoute">
               <el-collapse v-model="selected.hasChild">
-                <el-collapse-item v-for="item in selected" :key="item.key" :name="item.name">
+                <el-collapse-item v-for="item in selected" :key="item.name" :name="item.name">
                   <template slot="title">
                     <el-checkbox
                       :key="item.path"
@@ -48,6 +48,59 @@
                         </span>
                       </el-button>
                     </el-tooltip>
+                    <el-popover v-show="iseditDefaultRoutes" :ref="`popover-${item.name}-edit`" width="360" placement="right">
+                      <div style="padding-bottom: 15px;text-align: center;font-size: 18px;font-weight: 900;"><span>编辑角色</span></div>
+                      <el-card shadow="never">
+                        <el-form
+                          ref="infoForm"
+                          :rules="rules"
+                          :model="ParentRoute"
+                          label-width="80px"
+                          validate-on-rule-change
+                          status-icon
+                        >
+                          <el-form-item label="角色名" prop="name">
+                            <el-input v-model="ParentRoute.meta.title" clearable />
+                          </el-form-item>
+                          <el-form-item label="角色描述" prop="description">
+                            <el-input v-model="ParentRoute.meta.icon" type="textarea" clearable />
+                          </el-form-item>
+                        </el-form>
+                        <div style="text-align: right; margin: 0">
+                          <el-button
+                            type="text"
+                            size="mini"
+                            @click="$refs[`popover-${item.name}-edit`][0].doClose();"
+                          >取消</el-button>
+                          <el-button
+                            type="danger"
+                            size="mini"
+                            @click="$refs[`popover-${item.name}-edit`][0].doClose();"
+                          >确定</el-button>
+                        </div>
+                      </el-card>
+                      <span slot="reference" class="icon-default-type" @click.stop="">
+                        <svg-icon icon-class="edit-2" />
+                      </span>
+                    </el-popover>
+                    <el-popover v-show="iseditDefaultRoutes" :ref="`popover-${item.name}-dele`" width="160" placement="top">
+                      <p>确定删除该项吗？</p>
+                      <div style="text-align: right; margin: 0">
+                        <el-button
+                          type="text"
+                          size="mini"
+                          @click="$refs[`popover-${item.name}-dele`][0].doClose()"
+                        >取消</el-button>
+                        <el-button
+                          type="danger"
+                          size="mini"
+                          @click.stop="$refs[`popover-${item.name}-dele`][0].doClose()"
+                        >确定</el-button>
+                      </div>
+                      <span slot="reference" class="icon-default-type" @click.stop="">
+                        <svg-icon icon-class="trash" />
+                      </span>
+                    </el-popover>
                   </template>
                   <span v-if="!item.children">
                     <svg-icon icon-class="notify" style="margin: 0 15px 0 26px;font-size:18px;" />此页面无二级页面！
@@ -147,6 +200,19 @@
           </el-card>
         </el-col>
       </transition>
+      <transition name="el-zoom-in-top">
+        <el-col v-if="!isbuttomPMS" :span="7" style="margin-top:5px;">
+          <el-card shadow="never">
+            <el-alert title="点此新增页面和按钮！" type="info" show-icon :closable="false" />
+            <el-button
+              type="info"
+              style="margin: 10px 0px 0px 0px;padding: 12px 52px 12px 52px;"
+              :loading="isloading"
+              @click="editDefaultRoutes"
+            >管理通用模版</el-button>
+          </el-card>
+        </el-col>
+      </transition>
     </el-row>
   </div>
 </template>
@@ -154,7 +220,19 @@
 <script>
 import path from 'path'
 import { deepClone } from '@/utils'
-import { updateRole, getRoutes } from '@/api/role'
+import { updateRole, getRoutes, getdefaultRole } from '@/api/role'
+import searchEvent from './SearchEvent'
+const defaultParentRoute = {
+  path: '',
+  component: 'Layout',
+  redirect: '',
+  name: '',
+  meta: {
+    title: '',
+    icon: ''
+  },
+  children: []
+}
 export default {
   props: {
     assign: {
@@ -172,18 +250,35 @@ export default {
       isBtmIndeterminate: false,
       isbuttomPMS: false,
       isloading: false,
+      iseditDefaultRoutes: false,
+      defaultRole: {},
       roleInfo: [],
       buttomPMS: {},
       selected: [],
       checkedRoute: [],
-      serviceRoutes: []
+      serviceRoutes: [],
+      ParentRoute: Object.assign({}, defaultParentRoute),
+      rules: {
+        name: [
+          { required: true, message: '请输入角色名', trigger: 'blur' },
+          { min: 2, max: 25, message: '长度在 2 到 25 个字符', trigger: 'blur' }
+        ],
+        description: [
+          { required: true, message: '简介介绍角色职能', trigger: 'blur' },
+          { min: 2, max: 25, message: '长度在 2 到 25 个字符', trigger: 'blur' }
+        ]
+      }
     }
   },
   watch: {
     assign() {
+      console.log('----assign---- ')
       this.roleInfo = deepClone(this.assign)
+      this.iseditDefaultRoutes = false
+      console.log(this.roleInfo)
     },
     roleInfo() {
+      console.log('----roleInfo---- ')
       const routes = deepClone(this.roleInfo.routes)
       let data = []
       if (routes) {
@@ -207,18 +302,38 @@ export default {
   },
   created() {
     this.getRoutes()
+    this.getdefaultRole()
   },
   methods: {
     async getRoutes() {
       const res = await getRoutes()
       this.serviceRoutes = res.data
     },
+    getdefaultRole() {
+      getdefaultRole().then(res => {
+        this.defaultRole = res.data
+      })
+    },
+    // cancel() {
+    //   console.log('------------------')
+    //   this.$nextTick(() => {
+    //     console.log(this.$refs)
+    //     this.$refs['popover-Dashboard-dele'][0].doClose()
+    //   })
+    // },
     confirmBtm() {
       this.roleInfo.routesCount = this.roleInfo.routesCount.filter(item => {
         return item.name !== this.buttomPMS.name
       })
       this.roleInfo.routesCount.push(this.buttomPMS)
       this.isbuttomPMS = false
+    },
+    editDefaultRoutes() {
+      searchEvent.$emit('reCurrentRow')
+      setTimeout(() => {
+        this.iseditDefaultRoutes = true
+        this.roleInfo = deepClone(this.defaultRole)
+      }, 1000)
     },
     handleBtmCheckAllChange() {
       const list = []
@@ -228,7 +343,6 @@ export default {
       this.buttomPMS.hasBPMS = this.buttomPMS.checkAll ? list : []
     },
     handleBtmCheckedChange(ischecked, name) {
-      console.log(this.buttomPMS.hasBPMS)
       if (this.buttomPMS.hasBPMS.length === this.buttomPMS.realBPMS.length) {
         this.buttomPMS.checkAll = true
         this.isBtmIndeterminate = false
@@ -464,5 +578,18 @@ export default {
 .box-card-buttom >>> .el-card__header {
   background-color: #67c23a;
   color: white;
+}
+
+.icon-default-type{
+  color: silver;
+  margin-left: 5px;
+  font-size: 15px;
+  margin-top: 3px;
+  display: inline-block;
+}
+
+.icon-default-type:hover{
+  color: slategray;
+  cursor: pointer;
 }
 </style>
