@@ -67,6 +67,14 @@ export function updateRoutes(routesInfo) {
   })
 }
 
+export function updateChildRoutes(patName, routesInfo) {
+  return request({
+    url: `/update/updateChildRoutes`,
+    method: 'post',
+    data: { patName: patName, routesInfo: routesInfo }
+  })
+}
+
 export function addRoutes(routesInfo) {
   return request({
     url: `/add/addRoutes`,
@@ -80,5 +88,21 @@ export function addChildRoutes(routesInfo) {
     url: `/add/addChildRoutes`,
     method: 'post',
     data: routesInfo
+  })
+}
+
+export function deleRoutes(routesName) {
+  return request({
+    url: `/dele/deleRoutes`,
+    method: 'post',
+    data: routesName
+  })
+}
+
+export function deleChildRoutes(patName, routesName) {
+  return request({
+    url: `/dele/deleChildRoutes`,
+    method: 'post',
+    data: { patName: patName, routesName: routesName }
   })
 }

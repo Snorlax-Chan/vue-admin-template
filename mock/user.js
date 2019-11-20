@@ -6,6 +6,8 @@ export const asyncRoutes = [
     path: '/',
     component: 'Layout',
     redirect: '/dashboard',
+    name: 'PrDashboard',
+    meta: { title: '首页', icon: 'dashboard', affix: true },
     children: [
       {
         path: 'dashboard',
@@ -39,6 +41,8 @@ export const asyncRoutes = [
   {
     path: '/form',
     component: 'Layout',
+    name: 'PrForm',
+    meta: { title: 'Form', icon: 'form' },
     children: [
       {
         path: 'index',
@@ -76,6 +80,8 @@ export const asyncRoutes = [
   {
     path: 'external-link',
     component: 'Layout',
+    name: 'PrExternal',
+    meta: { title: ' External Link', icon: 'link' },
     children: [
       {
         path: 'https://panjiachen.github.io/vue-element-admin-site/#/',
@@ -93,6 +99,8 @@ export const test = [
     path: '/',
     component: 'Layout',
     redirect: '/dashboard',
+    name: 'PrDashboard',
+    meta: { title: 'Dashboard', icon: 'dashboard' },
     children: [
       {
         path: 'dashboard',

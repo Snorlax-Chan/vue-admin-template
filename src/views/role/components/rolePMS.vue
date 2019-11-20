@@ -64,16 +64,16 @@
                         size="mini"
                         @click="$refs[`popover-routes-add`].doClose();"
                       >取消</el-button>
-                      <el-button
-                        type="danger"
-                        size="mini"
-                        @click="addRoutes()"
-                      >确定</el-button>
+                      <el-button type="danger" size="mini" @click="addRoutes()">确定</el-button>
                     </div>
                   </el-card>
                 </el-scrollbar>
                 <span slot="reference" class="icon-default-type" @click.stop="editRoute(false,'')">
-                  <svg-icon icon-class="add-a-subscription" class="add-icon-type" style="margin: -10px 0 0px 230px;font-size: 36px;" />
+                  <svg-icon
+                    icon-class="add-a-subscription"
+                    class="add-icon-type"
+                    style="margin: -10px 0 0px 230px;font-size: 36px;"
+                  />
                 </span>
               </el-popover>
             </el-divider>
@@ -96,12 +96,7 @@
                       @change="handleCheckChange($event,item)"
                     >&nbsp;</el-checkbox>
                     <span style="font-size:16px;">{{ item.title }}</span>
-                    <el-tooltip
-                      v-if="!item.children"
-                      effect="dark"
-                      content="设置按钮权限"
-                      placement="bottom-start"
-                    >
+                    <el-tooltip effect="dark" content="设置按钮权限" placement="bottom-start">
                       <el-button type="text" @click.stop="showButtomPMS(item.name)">
                         <span class="icon-type">
                           <svg-icon icon-class="setting-2" />
@@ -143,7 +138,7 @@
                                 inactive-color="#ff4949"
                               />
                             </el-form-item>
-                            <el-form-item label="页面标题(meta.title)">
+                            <el-form-item label="页面标题(meta.title)" prop="meta.title">
                               <el-input v-model="ParentRoute.meta.title" clearable />
                             </el-form-item>
                             <el-form-item label="页面图标(meta.icon)">
@@ -156,11 +151,7 @@
                               size="mini"
                               @click="$refs[`popover-${item.name}-edit`][0].doClose();"
                             >取消</el-button>
-                            <el-button
-                              type="danger"
-                              size="mini"
-                              @click="updateRoutes(item);"
-                            >确定</el-button>
+                            <el-button type="danger" size="mini" @click="updateRoutes(item);">确定</el-button>
                           </div>
                         </el-card>
                       </el-scrollbar>
@@ -188,7 +179,7 @@
                         <el-button
                           type="danger"
                           size="mini"
-                          @click.stop="$refs[`popover-${item.name}-dele`][0].doClose()"
+                          @click.stop="$refs[`popover-${item.name}-dele`][0].doClose();deleRoute(item);"
                         >确定</el-button>
                       </div>
                       <span slot="reference" class="icon-default-type" @click.stop>
@@ -209,7 +200,7 @@
                       <el-scrollbar style="height: 400px;">
                         <el-card shadow="never">
                           <el-form
-                            ref="addChildRouteForm"
+                            :ref="`addChildRoute-${item.name}-Form`"
                             :rules="rules"
                             :model="ChildrenRoute"
                             label-width="260px"
@@ -236,18 +227,14 @@
                               size="mini"
                               @click="$refs[`popover-${item.name}-add`][0].doClose();"
                             >取消</el-button>
-                            <el-button
-                              type="danger"
-                              size="mini"
-                              @click="$refs[`popover-${item.name}-add`][0].doClose();addChildRoutes()"
-                            >确定</el-button>
+                            <el-button type="danger" size="mini" @click="addChildRoutes(item)">确定</el-button>
                           </div>
                         </el-card>
                       </el-scrollbar>
                       <span
                         slot="reference"
                         class="icon-default-type"
-                        @click.stop="editChildRoute(false,item)"
+                        @click.stop="editChildRoute(false,item,[])"
                       >
                         <svg-icon icon-class="add" />
                       </span>
@@ -288,7 +275,7 @@
                             <el-scrollbar style="height: 400px;">
                               <el-card shadow="never">
                                 <el-form
-                                  ref="addChildRouteForm"
+                                  :ref="`editChildRoute-${item.name}-Form`"
                                   :rules="rules"
                                   :model="ChildrenRoute"
                                   label-width="260px"
@@ -318,7 +305,7 @@
                                   <el-button
                                     type="danger"
                                     size="mini"
-                                    @click="$refs[`popover-${item.name}-editchild`][index].doClose();addChildRoutes()"
+                                    @click="updateChildRoutes(item,itemchild,index)"
                                   >确定</el-button>
                                 </div>
                               </el-card>
@@ -326,7 +313,7 @@
                             <span
                               slot="reference"
                               class="icon-default-type"
-                              @click.stop="editChildRoute(true,item)"
+                              @click.stop="editChildRoute(true,item,itemchild)"
                             >
                               <svg-icon icon-class="edit-2" />
                             </span>
@@ -349,7 +336,7 @@
                               <el-button
                                 type="danger"
                                 size="mini"
-                                @click.stop="$refs[`popover-${item.name}-deleChild`][index].doClose()"
+                                @click.stop="$refs[`popover-${item.name}-deleChild`][index].doClose();deleChildRoute(item,itemchild);"
                               >确定</el-button>
                             </div>
                             <span slot="reference" class="icon-default-type" @click.stop>
@@ -442,10 +429,7 @@
                     </div>
                   </el-card>
                 </el-scrollbar>
-                <span
-                  slot="reference"
-                  @click.stop=""
-                >
+                <span slot="reference" @click.stop>
                   <svg-icon
                     v-if="iseditDefaultRoutes"
                     icon-class="add-a-subscription"
@@ -474,7 +458,8 @@
                   :label="itbm.name"
                   style="margin-right:6px;"
                   @change="handleBtmCheckedChange(itbm.name)"
-                >{{ itbm.title }}
+                >
+                  {{ itbm.title }}
                   <el-button type="text" style="margin-left: -5px;">
                     <el-popover
                       v-if="iseditDefaultRoutes"
@@ -525,11 +510,7 @@
                           </div>
                         </el-card>
                       </el-scrollbar>
-                      <span
-                        slot="reference"
-                        class="icon-default-type"
-                        @click.stop=""
-                      >
+                      <span slot="reference" class="icon-default-type" @click.stop>
                         <svg-icon icon-class="edit-2" />
                       </span>
                     </el-popover>
@@ -558,7 +539,8 @@
                         <svg-icon icon-class="trash" />
                       </span>
                     </el-popover>
-                  </el-button></el-checkbox>
+                  </el-button>
+                </el-checkbox>
               </el-checkbox-group>
             </div>
             <el-button
@@ -599,7 +581,8 @@
 <script>
 import path from 'path'
 import { deepClone } from '@/utils'
-import { updateRole, getRoutes, getdefaultRole, updateRoutes, addRoutes, addChildRoutes } from '@/api/role'
+import { updateRole, getRoutes, getdefaultRole, updateRoutes, addRoutes,
+  addChildRoutes, deleRoutes, updateChildRoutes, deleChildRoutes } from '@/api/role'
 import searchEvent from './SearchEvent'
 const defaultParentRoute = {
   path: '',
@@ -645,7 +628,6 @@ export default {
       isbuttomPMS: false,
       isloading: false,
       iseditDefaultRoutes: false,
-      ParentRouteName: '',
       defaultRole: {},
       roleInfo: [],
       buttomPMS: {},
@@ -687,6 +669,8 @@ export default {
       }
       this.realRoutes = deepClone(this.serviceRoutes)
       this.selected = this.getchecked(this.generateRoutes(this.realRoutes), data)
+      console.log('role-----')
+      console.log(this.selected)
     },
     realRoutes() {
       if (this.iseditDefaultRoutes) {
@@ -721,21 +705,51 @@ export default {
         this.defaultRole = res.data
       })
     },
-    addChildRoutes(val) {
-      addChildRoutes(this.ChildrenRoute).then(res => {
-        if (res.data === 'success') {
+    addChildRoutes(item) {
+      this.$refs[`addChildRoute-${item.name}-Form`][0].validate(valid => {
+        if (valid) {
+          addChildRoutes(this.ChildrenRoute).then(res => {
+            if (res.data) {
+              this.$message({
+                showClose: true,
+                message: '子级页面信息新增成功！',
+                type: 'success'
+              })
+              this.ChildrenRoute.name = res.data
+              if (!item.children) {
+                this.realRoutes.forEach(jtem => {
+                  if (jtem.children) {
+                    jtem.children.forEach(btem => {
+                      if (btem.name === item.name) {
+                        jtem.children.push(this.ChildrenRoute)
+                      }
+                    })
+                  }
+                })
+              } else {
+                this.realRoutes.forEach(jtem => {
+                  if (jtem.name === item.name) {
+                    jtem.children.push(this.ChildrenRoute)
+                  }
+                })
+              }
+              this.selected = this.getchecked(this.generateRoutes(this.realRoutes), [])
+              this.$refs[`popover-${item.name}-add`][0].doClose()
+            }
+          }).catch(e => {
+            this.$message({
+              showClose: true,
+              message: '新增失败！错误信息：' + e,
+              type: 'error'
+            })
+          })
+        } else {
           this.$message({
             showClose: true,
-            message: '子级页面信息新增成功！',
-            type: 'success'
+            message: '新增失败！请正确填写表单',
+            type: 'error'
           })
         }
-      }).catch(e => {
-        this.$message({
-          showClose: true,
-          message: '修改失败！错误信息：' + e,
-          type: 'error'
-        })
       })
     },
     addRoutes() {
@@ -779,7 +793,12 @@ export default {
           // eslint-disable-next-line no-unused-vars
           for (const i in this.realRoutes) {
             if (this.realRoutes[i].name === this.ParentRoute.name) {
-              this.realRoutes[i] = deepClone(this.ParentRoute)
+              if (this.realRoutes[i].children.length < 2) {
+                this.realRoutes[i].children[0].meta.title = this.ParentRoute.meta.title
+                this.realRoutes[i].children[0].meta.icon = this.ParentRoute.meta.icon
+              } else {
+                this.realRoutes[i] = deepClone(this.ParentRoute)
+              }
             }
           }
           this.selected = this.getchecked(this.generateRoutes(this.realRoutes), [])
@@ -788,7 +807,6 @@ export default {
           //     jtem = deepClone(this.ParentRoute)
           //   }
           // })
-          console.log(this.realRoutes)
           this.$refs[`popover-${item.name}-edit`][0].doClose()
         }
       }).catch(e => {
@@ -799,14 +817,105 @@ export default {
         })
       })
     },
-    editChildRoute(isedit, val) {
+    updateChildRoutes(item, itemchild, index) {
+      updateChildRoutes(item.name, this.ChildrenRoute).then(res => {
+        if (res.data === 'success') {
+          this.$message({
+            showClose: true,
+            message: '子页面信息修改成功！',
+            type: 'success'
+          })
+          this.realRoutes.forEach(jtem => {
+            if (jtem.name === item.name) {
+              if (jtem.children) {
+                // eslint-disable-next-line no-unused-vars
+                for (const i in jtem.children) {
+                  console.log(itemchild.name)
+                  if (jtem.children[i].name === itemchild.name) {
+                    jtem.children[i] = deepClone(this.ChildrenRoute)
+                  }
+                }
+              }
+            }
+          })
+          this.selected = this.getchecked(this.generateRoutes(this.realRoutes), [])
+          this.$refs[`popover-${item.name}-editchild`][index].doClose()
+        }
+      }).catch(e => {
+        this.$message({
+          showClose: true,
+          message: '修改失败！错误信息：' + e,
+          type: 'error'
+        })
+      })
+    },
+    deleRoute(item) {
+      deleRoutes(item.name).then(res => {
+        if (res.data === 'success') {
+          this.$message({
+            showClose: true,
+            message: '页面删除成功！',
+            type: 'success'
+          })
+          this.realRoutes = this.realRoutes.filter(jtem => {
+            return jtem.name !== item.name
+          })
+          this.selected = this.getchecked(this.generateRoutes(this.realRoutes), [])
+        }
+      }).catch(e => {
+        this.$message({
+          showClose: true,
+          message: '删除失败！错误信息：' + e,
+          type: 'error'
+        })
+      })
+    },
+    deleChildRoute(item, itemchild) {
+      deleChildRoutes(item.name, itemchild.name).then(res => {
+        if (res.data === 'success') {
+          this.$message({
+            showClose: true,
+            message: '子页面删除成功！',
+            type: 'success'
+          })
+          this.realRoutes.forEach(jtem => {
+            if (jtem.name === item.name) {
+              if (jtem.children) {
+                jtem.children = jtem.children.filter(btem => {
+                  return btem.name !== itemchild.name
+                })
+              }
+            }
+          })
+          this.selected = this.getchecked(this.generateRoutes(this.realRoutes), [])
+        }
+      }).catch(e => {
+        this.$message({
+          showClose: true,
+          message: '删除失败！错误信息：' + e,
+          type: 'error'
+        })
+      })
+    },
+    editChildRoute(isedit, val, valchild) {
       if (isedit) {
-        console.log('------------')
+        this.realRoutes.forEach(item => {
+          if (item.name === val.name) {
+            if (item.children) {
+              item.children.forEach(jtem => {
+                if (jtem.name === valchild.name) {
+                  this.ChildrenRoute = deepClone(jtem)
+                }
+              })
+            }
+          }
+        })
       } else {
+        if (this.$refs[`addChildRoute-${val.name}-Form`][0] !== undefined) {
+          this.$refs[`addChildRoute-${val.name}-Form`][0].resetFields()
+        }
         this.ChildrenRoute = Object.assign({}, defaultChildrenRoute)
         this.ChildrenRoute.meta = Object.assign({}, defaultMata)
-        this.ParentRouteName = val.name
-        console.log(val.name)
       }
     },
     editRoute(isedit, val) {
@@ -816,11 +925,23 @@ export default {
         }
         const routes = deepClone(this.realRoutes)
         let data = {}
-        routes.forEach(item => {
-          if (item.name === val.name) {
-            data = deepClone(item)
-          }
-        })
+        if (!val.children) {
+          routes.forEach(item => {
+            if (item.children) {
+              item.children.forEach(jtem => {
+                if (jtem.name === val.name) {
+                  data = deepClone(item)
+                }
+              })
+            }
+          })
+        } else {
+          routes.forEach(item => {
+            if (item.name === val.name) {
+              data = deepClone(item)
+            }
+          })
+        }
         this.ParentRoute = data
       } else {
         if (this.$refs.addRouteForm !== undefined) {
@@ -876,6 +997,7 @@ export default {
       this.isloading = true
       const checkedNames = this.checkedRoute.concat(this.getcheckedArr(this.selected))
       this.roleInfo.routes = this.generateTree(deepClone(this.serviceRoutes), checkedNames)
+      console.log(this.roleInfo.routes)
       updateRole(this.roleInfo.id, this.roleInfo).then(res => {
         if (res.data.status === 'success') {
           this.isloading = false
@@ -983,17 +1105,17 @@ export default {
       const res = []
 
       // eslint-disable-next-line no-unused-vars
-      for (let route of routes) {
+      for (const route of routes) {
         // skip some route
         if (route.hidden) {
           continue
         }
 
-        const onlyOneShowingChild = this.onlyOneShowingChild(route.children, route)
+        // const onlyOneShowingChild = this.onlyOneShowingChild(route.children, route)
 
-        if (route.children && onlyOneShowingChild && !route.alwaysShow) {
-          route = onlyOneShowingChild
-        }
+        // if (route.children && onlyOneShowingChild && !route.alwaysShow) {
+        //   route = onlyOneShowingChild
+        // }
         const data = {
           path: path.resolve(basePath, route.path),
           title: route.meta && route.meta.title,
@@ -1111,7 +1233,7 @@ export default {
   cursor: pointer;
 }
 
-.add-icon-type:hover{
+.add-icon-type:hover {
   color: red;
 }
 </style>

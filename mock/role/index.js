@@ -87,6 +87,22 @@ const roleEditPMS = [
       checkAll: false,
       hasBPMS: [],
       realBPMS: []
+    },
+    {
+      id: '9',
+      name: 'Permission',
+      title: '权限管理',
+      checkAll: false,
+      hasBPMS: [],
+      realBPMS: []
+    },
+    {
+      id: '10',
+      name: 'Nested',
+      title: 'Nested',
+      checkAll: false,
+      hasBPMS: [],
+      realBPMS: []
     }
     ]
   },
@@ -357,6 +373,18 @@ export default [
     }
   },
 
+  // update child routes
+  {
+    url: '/update/updateChildRoutes',
+    type: 'post',
+    response: _ => {
+      return {
+        code: 20000,
+        data: 'success'
+      }
+    }
+  },
+
   // add routes
   // 新增默认的路由，应返回一个不重复的name
   {
@@ -377,7 +405,31 @@ export default [
     response: _ => {
       return {
         code: 20000,
-        data: 'success1'
+        data: Mock.Random.character('lower')
+      }
+    }
+  },
+
+  // dele route
+  {
+    url: '/dele/deleRoutes',
+    type: 'post',
+    response: _ => {
+      return {
+        code: 20000,
+        data: 'success'
+      }
+    }
+  },
+
+  // dele child route
+  {
+    url: '/dele/deleChildRoutes',
+    type: 'post',
+    response: _ => {
+      return {
+        code: 20000,
+        data: 'success'
       }
     }
   },
