@@ -58,3 +58,27 @@ export function getdefaultRole() {
     method: 'get'
   })
 }
+
+export function updateRoutes(routesInfo) {
+  return request({
+    url: `/update/updateRoutes`,
+    method: 'post',
+    data: routesInfo
+  })
+}
+
+export function addRoutes(routesInfo) {
+  return request({
+    url: `/add/addRoutes`,
+    method: 'post',
+    data: routesInfo
+  })
+}
+
+export function addChildRoutes(routesInfo) {
+  return request({
+    url: `/add/addChildRoutes`,
+    method: 'post',
+    data: routesInfo
+  })
+}

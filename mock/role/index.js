@@ -345,6 +345,43 @@ export default [
     }
   },
 
+  // update routes
+  {
+    url: '/update/updateRoutes',
+    type: 'post',
+    response: _ => {
+      return {
+        code: 20000,
+        data: 'success'
+      }
+    }
+  },
+
+  // add routes
+  // 新增默认的路由，应返回一个不重复的name
+  {
+    url: '/add/addRoutes',
+    type: 'post',
+    response: _ => {
+      return {
+        code: 20000,
+        data: Mock.Random.character('lower')
+      }
+    }
+  },
+
+  // add child routes
+  {
+    url: '/add/addChildRoutes',
+    type: 'post',
+    response: _ => {
+      return {
+        code: 20000,
+        data: 'success1'
+      }
+    }
+  },
+
   // user roleAllEditPMS
   {
     url: '/roleAllEditPMS',

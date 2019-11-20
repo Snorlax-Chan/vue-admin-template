@@ -25,8 +25,6 @@
                 <el-select
                   v-model="routeName"
                   placeholder="复制已存在权限!(非必选)"
-                  filterable
-                  clearable
                   @change="clonePMS"
                 >
                   <el-option
@@ -203,6 +201,7 @@ export default {
       })
     },
     clonePMS(item) {
+      this.routeName = item.name
       this.currentRow.routes = deepClone(item.routes)
       this.currentRow.routesCount = deepClone(item.routesCount)
     },

@@ -1,7 +1,7 @@
 <template>
   <div>
     <el-row>
-      <el-col :span="17">
+      <el-col :span="15">
         <el-card class="box-card" shadow="never" style="height:80vh;">
           <div slot="header">
             <span>详情页</span>
@@ -16,6 +16,66 @@
             >{{ roleInfo.description }}</div>
             <el-divider content-position="left">
               <svg-icon icon-class="page" style="margin-right: 10px;font-size:18px;" />页面权限
+              <el-popover
+                v-if="iseditDefaultRoutes"
+                :ref="`popover-routes-add`"
+                width="360"
+                placement="right"
+              >
+                <div
+                  style="padding-bottom: 15px;text-align: center;font-size: 18px;font-weight: 900;"
+                >
+                  <span>新增页面</span>
+                </div>
+                <el-scrollbar style="height: 400px;">
+                  <el-card shadow="never">
+                    <el-form
+                      ref="addRouteForm"
+                      :rules="rules"
+                      :model="ParentRoute"
+                      label-width="260px"
+                      validate-on-rule-change
+                      status-icon
+                      label-position="top"
+                    >
+                      <el-form-item label="页面路径(Path)" prop="path">
+                        <el-input v-model="ParentRoute.path" clearable />
+                      </el-form-item>
+                      <el-form-item label="重定向(redirect)" prop="redirect">
+                        <el-input v-model="ParentRoute.redirect" clearable />
+                      </el-form-item>
+                      <el-form-item label="是否隐藏(hidden)" prop="hidden">
+                        <el-switch
+                          v-model="ParentRoute.hidden"
+                          active-color="#13ce66"
+                          inactive-color="#ff4949"
+                        />
+                      </el-form-item>
+                      <el-form-item label="页面标题(meta.title)" prop="meta.title">
+                        <el-input v-model="ParentRoute.meta.title" clearable />
+                      </el-form-item>
+                      <el-form-item label="页面图标(meta.icon)" prop="meta.icon">
+                        <el-input v-model="ParentRoute.meta.icon" clearable />
+                      </el-form-item>
+                    </el-form>
+                    <div style="text-align: right; margin: 0">
+                      <el-button
+                        type="text"
+                        size="mini"
+                        @click="$refs[`popover-routes-add`].doClose();"
+                      >取消</el-button>
+                      <el-button
+                        type="danger"
+                        size="mini"
+                        @click="addRoutes()"
+                      >确定</el-button>
+                    </div>
+                  </el-card>
+                </el-scrollbar>
+                <span slot="reference" class="icon-default-type" @click.stop="editRoute(false,'')">
+                  <svg-icon icon-class="add-a-subscription" class="add-icon-type" style="margin: -10px 0 0px 230px;font-size: 36px;" />
+                </span>
+              </el-popover>
             </el-divider>
             <div style="padding: 5px 0 18px 0;">
               <el-checkbox
@@ -48,42 +108,76 @@
                         </span>
                       </el-button>
                     </el-tooltip>
-                    <el-popover v-show="iseditDefaultRoutes" :ref="`popover-${item.name}-edit`" width="360" placement="right">
-                      <div style="padding-bottom: 15px;text-align: center;font-size: 18px;font-weight: 900;"><span>编辑角色</span></div>
-                      <el-card shadow="never">
-                        <el-form
-                          ref="infoForm"
-                          :rules="rules"
-                          :model="ParentRoute"
-                          label-width="80px"
-                          validate-on-rule-change
-                          status-icon
-                        >
-                          <el-form-item label="角色名" prop="name">
-                            <el-input v-model="ParentRoute.meta.title" clearable />
-                          </el-form-item>
-                          <el-form-item label="角色描述" prop="description">
-                            <el-input v-model="ParentRoute.meta.icon" type="textarea" clearable />
-                          </el-form-item>
-                        </el-form>
-                        <div style="text-align: right; margin: 0">
-                          <el-button
-                            type="text"
-                            size="mini"
-                            @click="$refs[`popover-${item.name}-edit`][0].doClose();"
-                          >取消</el-button>
-                          <el-button
-                            type="danger"
-                            size="mini"
-                            @click="$refs[`popover-${item.name}-edit`][0].doClose();"
-                          >确定</el-button>
-                        </div>
-                      </el-card>
-                      <span slot="reference" class="icon-default-type" @click.stop="">
+                    <el-popover
+                      v-if="iseditDefaultRoutes"
+                      :ref="`popover-${item.name}-edit`"
+                      width="360"
+                      placement="right"
+                    >
+                      <div
+                        style="padding-bottom: 15px;text-align: center;font-size: 18px;font-weight: 900;"
+                      >
+                        <span>编辑页面</span>
+                      </div>
+                      <el-scrollbar style="height: 400px;">
+                        <el-card shadow="never">
+                          <el-form
+                            :ref="`editRoute-${item.name}-form`"
+                            :rules="rules"
+                            :model="ParentRoute"
+                            label-width="260px"
+                            validate-on-rule-change
+                            status-icon
+                            label-position="top"
+                          >
+                            <el-form-item label="页面路径(Path)" prop="path">
+                              <el-input v-model="ParentRoute.path" clearable />
+                            </el-form-item>
+                            <el-form-item label="重定向(redirect)" prop="redirect">
+                              <el-input v-model="ParentRoute.redirect" clearable />
+                            </el-form-item>
+                            <el-form-item label="是否隐藏(hidden)" prop="hidden">
+                              <el-switch
+                                v-model="ParentRoute.hidden"
+                                active-color="#13ce66"
+                                inactive-color="#ff4949"
+                              />
+                            </el-form-item>
+                            <el-form-item label="页面标题(meta.title)">
+                              <el-input v-model="ParentRoute.meta.title" clearable />
+                            </el-form-item>
+                            <el-form-item label="页面图标(meta.icon)">
+                              <el-input v-model="ParentRoute.meta.icon" clearable />
+                            </el-form-item>
+                          </el-form>
+                          <div style="text-align: right; margin: 0">
+                            <el-button
+                              type="text"
+                              size="mini"
+                              @click="$refs[`popover-${item.name}-edit`][0].doClose();"
+                            >取消</el-button>
+                            <el-button
+                              type="danger"
+                              size="mini"
+                              @click="updateRoutes(item);"
+                            >确定</el-button>
+                          </div>
+                        </el-card>
+                      </el-scrollbar>
+                      <span
+                        slot="reference"
+                        class="icon-default-type"
+                        @click.stop="editRoute(true,item)"
+                      >
                         <svg-icon icon-class="edit-2" />
                       </span>
                     </el-popover>
-                    <el-popover v-show="iseditDefaultRoutes" :ref="`popover-${item.name}-dele`" width="160" placement="top">
+                    <el-popover
+                      v-if="iseditDefaultRoutes"
+                      :ref="`popover-${item.name}-dele`"
+                      width="160"
+                      placement="top"
+                    >
                       <p>确定删除该项吗？</p>
                       <div style="text-align: right; margin: 0">
                         <el-button
@@ -97,8 +191,65 @@
                           @click.stop="$refs[`popover-${item.name}-dele`][0].doClose()"
                         >确定</el-button>
                       </div>
-                      <span slot="reference" class="icon-default-type" @click.stop="">
+                      <span slot="reference" class="icon-default-type" @click.stop>
                         <svg-icon icon-class="trash" />
+                      </span>
+                    </el-popover>
+                    <el-popover
+                      v-if="iseditDefaultRoutes"
+                      :ref="`popover-${item.name}-add`"
+                      width="360"
+                      placement="right"
+                    >
+                      <div
+                        style="padding-bottom: 15px;text-align: center;font-size: 18px;font-weight: 900;"
+                      >
+                        <span>新增子级页面</span>
+                      </div>
+                      <el-scrollbar style="height: 400px;">
+                        <el-card shadow="never">
+                          <el-form
+                            ref="addChildRouteForm"
+                            :rules="rules"
+                            :model="ChildrenRoute"
+                            label-width="260px"
+                            validate-on-rule-change
+                            status-icon
+                            label-position="top"
+                          >
+                            <el-form-item label="页面路径(Path)" prop="path">
+                              <el-input v-model="ChildrenRoute.path" clearable />
+                            </el-form-item>
+                            <el-form-item label="组件(component)" prop="component">
+                              <el-input v-model="ChildrenRoute.component" clearable />
+                            </el-form-item>
+                            <el-form-item label="页面标题(meta.title)" prop="meta.title">
+                              <el-input v-model="ChildrenRoute.meta.title" clearable />
+                            </el-form-item>
+                            <el-form-item label="页面图标(meta.icon)" prop="meta.icon">
+                              <el-input v-model="ChildrenRoute.meta.icon" clearable />
+                            </el-form-item>
+                          </el-form>
+                          <div style="text-align: right; margin: 0">
+                            <el-button
+                              type="text"
+                              size="mini"
+                              @click="$refs[`popover-${item.name}-add`][0].doClose();"
+                            >取消</el-button>
+                            <el-button
+                              type="danger"
+                              size="mini"
+                              @click="$refs[`popover-${item.name}-add`][0].doClose();addChildRoutes()"
+                            >确定</el-button>
+                          </div>
+                        </el-card>
+                      </el-scrollbar>
+                      <span
+                        slot="reference"
+                        class="icon-default-type"
+                        @click.stop="editChildRoute(false,item)"
+                      >
+                        <svg-icon icon-class="add" />
                       </span>
                     </el-popover>
                   </template>
@@ -108,7 +259,7 @@
                   <div v-else>
                     <el-checkbox-group v-model="item.checked">
                       <el-checkbox
-                        v-for="itemchild in item.children"
+                        v-for="(itemchild,index) in item.children"
                         :key="itemchild.path"
                         :label="itemchild.name"
                         @click.stop.native
@@ -122,6 +273,90 @@
                             </span>
                           </el-button>
                         </el-tooltip>
+                        <el-button type="text" style="margin-left: -5px;">
+                          <el-popover
+                            v-if="iseditDefaultRoutes"
+                            :ref="`popover-${item.name}-editchild`"
+                            width="360"
+                            placement="right"
+                          >
+                            <div
+                              style="padding-bottom: 15px;text-align: center;font-size: 18px;font-weight: 900;"
+                            >
+                              <span>编辑子级页面</span>
+                            </div>
+                            <el-scrollbar style="height: 400px;">
+                              <el-card shadow="never">
+                                <el-form
+                                  ref="addChildRouteForm"
+                                  :rules="rules"
+                                  :model="ChildrenRoute"
+                                  label-width="260px"
+                                  validate-on-rule-change
+                                  status-icon
+                                  label-position="top"
+                                >
+                                  <el-form-item label="页面路径(Path)" prop="path">
+                                    <el-input v-model="ChildrenRoute.path" clearable />
+                                  </el-form-item>
+                                  <el-form-item label="组件(component)" prop="component">
+                                    <el-input v-model="ChildrenRoute.component" clearable />
+                                  </el-form-item>
+                                  <el-form-item label="页面标题(meta.title)" prop="meta.title">
+                                    <el-input v-model="ChildrenRoute.meta.title" clearable />
+                                  </el-form-item>
+                                  <el-form-item label="页面图标(meta.icon)" prop="meta.icon">
+                                    <el-input v-model="ChildrenRoute.meta.icon" clearable />
+                                  </el-form-item>
+                                </el-form>
+                                <div style="text-align: right; margin: 0">
+                                  <el-button
+                                    type="text"
+                                    size="mini"
+                                    @click="$refs[`popover-${item.name}-editchild`][index].doClose();"
+                                  >取消</el-button>
+                                  <el-button
+                                    type="danger"
+                                    size="mini"
+                                    @click="$refs[`popover-${item.name}-editchild`][index].doClose();addChildRoutes()"
+                                  >确定</el-button>
+                                </div>
+                              </el-card>
+                            </el-scrollbar>
+                            <span
+                              slot="reference"
+                              class="icon-default-type"
+                              @click.stop="editChildRoute(true,item)"
+                            >
+                              <svg-icon icon-class="edit-2" />
+                            </span>
+                          </el-popover>
+                        </el-button>
+                        <el-button type="text" style="margin-left:-5px;">
+                          <el-popover
+                            v-if="iseditDefaultRoutes"
+                            :ref="`popover-${item.name}-deleChild`"
+                            width="160"
+                            placement="top"
+                          >
+                            <p>确定删除该项吗？</p>
+                            <div style="text-align: right; margin: 0">
+                              <el-button
+                                type="text"
+                                size="mini"
+                                @click="$refs[`popover-${item.name}-deleChild`][index].doClose()"
+                              >取消</el-button>
+                              <el-button
+                                type="danger"
+                                size="mini"
+                                @click.stop="$refs[`popover-${item.name}-deleChild`][index].doClose()"
+                              >确定</el-button>
+                            </div>
+                            <span slot="reference" class="icon-default-type" @click.stop>
+                              <svg-icon icon-class="trash" />
+                            </span>
+                          </el-popover>
+                        </el-button>
                       </el-checkbox>
                     </el-checkbox-group>
                   </div>
@@ -132,13 +367,13 @@
         </el-card>
       </el-col>
       <transition name="el-zoom-in-top">
-        <el-col v-if="!isbuttomPMS" :span="7">
+        <el-col v-if="!isbuttomPMS" :span="9">
           <el-card shadow="never">
             <div slot="header">操作</div>
             <el-alert title="点击下方按钮保存！" type="info" show-icon :closable="false" />
             <el-button
               type="success"
-              style="margin: 10px 0px 0px 0px;padding: 12px 80px 12px 80px;"
+              style="margin: 10px 0px 0px 30px;padding: 12px 80px 12px 80px;"
               :loading="isloading"
               @click="confirmRole"
             >提交</el-button>
@@ -146,7 +381,7 @@
         </el-col>
       </transition>
       <transition name="el-zoom-in-bottom">
-        <el-col v-if="isbuttomPMS" :span="7">
+        <el-col v-if="isbuttomPMS" :span="9">
           <el-card shadow="never">
             <div style="font-size:20px;">
               <svg-icon icon-class="page" />
@@ -158,6 +393,66 @@
             >此处管理已有按钮权限</div>
             <el-divider content-position="left">
               <svg-icon icon-class="setting-2" style="margin-right: 10px;font-size:18px;" />按钮权限
+              <el-popover
+                v-if="iseditDefaultRoutes"
+                :ref="`popover-route-newBtm`"
+                width="360"
+                placement="right"
+              >
+                <div
+                  style="padding-bottom: 15px;text-align: center;font-size: 18px;font-weight: 900;"
+                >
+                  <span>新建按钮</span>
+                </div>
+                <el-scrollbar style="height: 400px;">
+                  <el-card shadow="never">
+                    <el-form
+                      ref="addChildRouteForm"
+                      :rules="rules"
+                      :model="ChildrenRoute"
+                      label-width="260px"
+                      validate-on-rule-change
+                      status-icon
+                      label-position="top"
+                    >
+                      <el-form-item label="页面路径(Path)" prop="path">
+                        <el-input v-model="ChildrenRoute.path" clearable />
+                      </el-form-item>
+                      <el-form-item label="组件(component)" prop="component">
+                        <el-input v-model="ChildrenRoute.component" clearable />
+                      </el-form-item>
+                      <el-form-item label="页面标题(meta.title)" prop="meta.title">
+                        <el-input v-model="ChildrenRoute.meta.title" clearable />
+                      </el-form-item>
+                      <el-form-item label="页面图标(meta.icon)" prop="meta.icon">
+                        <el-input v-model="ChildrenRoute.meta.icon" clearable />
+                      </el-form-item>
+                    </el-form>
+                    <div style="text-align: right; margin: 0">
+                      <el-button
+                        type="text"
+                        size="mini"
+                        @click="$refs[`popover-route-newBtm`].doClose();"
+                      >取消</el-button>
+                      <el-button
+                        type="danger"
+                        size="mini"
+                        @click="$refs[`popover-route-newBtm`].doClose();addChildRoutes()"
+                      >确定</el-button>
+                    </div>
+                  </el-card>
+                </el-scrollbar>
+                <span
+                  slot="reference"
+                  @click.stop=""
+                >
+                  <svg-icon
+                    v-if="iseditDefaultRoutes"
+                    icon-class="add-a-subscription"
+                    class="add-icon-type"
+                  />
+                </span>
+              </el-popover>
             </el-divider>
             <span v-if="(buttomPMS.realBPMS.length === 0)">
               <svg-icon
@@ -174,17 +469,102 @@
               >全选</el-checkbox>
               <el-checkbox-group v-model="buttomPMS.hasBPMS" style="display:inline;">
                 <el-checkbox
-                  v-for="itbm in buttomPMS.realBPMS"
+                  v-for="(itbm,index) in buttomPMS.realBPMS"
                   :key="itbm.id"
                   :label="itbm.name"
+                  style="margin-right:6px;"
                   @change="handleBtmCheckedChange(itbm.name)"
-                >{{ itbm.title }}</el-checkbox>
+                >{{ itbm.title }}
+                  <el-button type="text" style="margin-left: -5px;">
+                    <el-popover
+                      v-if="iseditDefaultRoutes"
+                      :ref="`popover-${itbm.name}-editBtm`"
+                      width="360"
+                      placement="right"
+                    >
+                      <div
+                        style="padding-bottom: 15px;text-align: center;font-size: 18px;font-weight: 900;"
+                      >
+                        <span>编辑按钮</span>
+                      </div>
+                      <el-scrollbar style="height: 400px;">
+                        <el-card shadow="never">
+                          <el-form
+                            ref="addChildRouteForm"
+                            :rules="rules"
+                            :model="ChildrenRoute"
+                            label-width="260px"
+                            validate-on-rule-change
+                            status-icon
+                            label-position="top"
+                          >
+                            <el-form-item label="页面路径(Path)" prop="path">
+                              <el-input v-model="ChildrenRoute.path" clearable />
+                            </el-form-item>
+                            <el-form-item label="组件(component)" prop="component">
+                              <el-input v-model="ChildrenRoute.component" clearable />
+                            </el-form-item>
+                            <el-form-item label="页面标题(meta.title)" prop="meta.title">
+                              <el-input v-model="ChildrenRoute.meta.title" clearable />
+                            </el-form-item>
+                            <el-form-item label="页面图标(meta.icon)" prop="meta.icon">
+                              <el-input v-model="ChildrenRoute.meta.icon" clearable />
+                            </el-form-item>
+                          </el-form>
+                          <div style="text-align: right; margin: 0">
+                            <el-button
+                              type="text"
+                              size="mini"
+                              @click="$refs[`popover-${itbm.name}-editBtm`][index].doClose();"
+                            >取消</el-button>
+                            <el-button
+                              type="danger"
+                              size="mini"
+                              @click="$refs[`popover-${itbm.name}-editBtm`][index].doClose();addChildRoutes()"
+                            >确定</el-button>
+                          </div>
+                        </el-card>
+                      </el-scrollbar>
+                      <span
+                        slot="reference"
+                        class="icon-default-type"
+                        @click.stop=""
+                      >
+                        <svg-icon icon-class="edit-2" />
+                      </span>
+                    </el-popover>
+                  </el-button>
+                  <el-button type="text" style="margin-left:-5px;">
+                    <el-popover
+                      v-if="iseditDefaultRoutes"
+                      :ref="`popover-${itbm.name}-deleBtm`"
+                      width="160"
+                      placement="top"
+                    >
+                      <p>确定删除该项吗？</p>
+                      <div style="text-align: right; margin: 0">
+                        <el-button
+                          type="text"
+                          size="mini"
+                          @click="$refs[`popover-${itbm.name}-deleBtm`][index].doClose()"
+                        >取消</el-button>
+                        <el-button
+                          type="danger"
+                          size="mini"
+                          @click.stop="$refs[`popover-${itbm.name}-deleBtm`][index].doClose()"
+                        >确定</el-button>
+                      </div>
+                      <span slot="reference" class="icon-default-type" @click.stop>
+                        <svg-icon icon-class="trash" />
+                      </span>
+                    </el-popover>
+                  </el-button></el-checkbox>
               </el-checkbox-group>
             </div>
             <el-button
               v-if="(buttomPMS.realBPMS.length !== 0)"
               type="success"
-              style="margin: 15px 0px 0px;padding: 2px 80px;font-size: 30px;"
+              style="margin: 15px 0px 0px 30px;padding: 2px 80px;font-size: 30px;"
               @click="confirmBtm"
             >
               <svg-icon icon-class="arrow-right-3" />
@@ -192,7 +572,7 @@
             <el-button
               v-else
               type="success"
-              style="margin: 15px 0px 0px;padding: 2px 80px;font-size: 30px;"
+              style="margin: 15px 0px 0px 30px;padding: 2px 80px;font-size: 30px;"
               @click="isbuttomPMS=false;"
             >
               <svg-icon icon-class="arrow-right-3" />
@@ -201,13 +581,12 @@
         </el-col>
       </transition>
       <transition name="el-zoom-in-top">
-        <el-col v-if="!isbuttomPMS" :span="7" style="margin-top:5px;">
+        <el-col v-if="!isbuttomPMS" :span="9" style="margin-top:5px;">
           <el-card shadow="never">
             <el-alert title="点此新增页面和按钮！" type="info" show-icon :closable="false" />
             <el-button
               type="info"
-              style="margin: 10px 0px 0px 0px;padding: 12px 52px 12px 52px;"
-              :loading="isloading"
+              style="margin: 10px 0px 0px 30px;padding: 12px 52px 12px 52px;"
               @click="editDefaultRoutes"
             >管理通用模版</el-button>
           </el-card>
@@ -220,18 +599,26 @@
 <script>
 import path from 'path'
 import { deepClone } from '@/utils'
-import { updateRole, getRoutes, getdefaultRole } from '@/api/role'
+import { updateRole, getRoutes, getdefaultRole, updateRoutes, addRoutes, addChildRoutes } from '@/api/role'
 import searchEvent from './SearchEvent'
 const defaultParentRoute = {
   path: '',
   component: 'Layout',
   redirect: '',
+  hidden: false,
   name: '',
-  meta: {
-    title: '',
-    icon: ''
-  },
-  children: []
+  meta: Object.assign({}, defaultMata)
+}
+const defaultMata = {
+  title: '',
+  icon: ''
+}
+
+const defaultChildrenRoute = {
+  path: '',
+  name: '',
+  component: '',
+  meta: Object.assign({}, defaultMata)
 }
 export default {
   props: {
@@ -243,6 +630,13 @@ export default {
       } }
   },
   data() {
+    const validatePath = (rule, value, callback) => {
+      if (!(/(^\/?[a-z]+)*/).test(value)) {
+        callback(new Error('路径地址格式错误，参照/path'))
+      } else {
+        callback()
+      }
+    }
     return {
       activeNames: ['1'],
       checkAll: false,
@@ -251,41 +645,54 @@ export default {
       isbuttomPMS: false,
       isloading: false,
       iseditDefaultRoutes: false,
+      ParentRouteName: '',
       defaultRole: {},
       roleInfo: [],
       buttomPMS: {},
       selected: [],
       checkedRoute: [],
       serviceRoutes: [],
+      realRoutes: [],
+      ChildrenRoute: Object.assign({}, defaultChildrenRoute),
       ParentRoute: Object.assign({}, defaultParentRoute),
       rules: {
-        name: [
-          { required: true, message: '请输入角色名', trigger: 'blur' },
-          { min: 2, max: 25, message: '长度在 2 到 25 个字符', trigger: 'blur' }
+        path: [
+          { required: true, message: '请输入路径', trigger: 'blur' },
+          { validator: validatePath, trigger: 'blur' }
         ],
-        description: [
-          { required: true, message: '简介介绍角色职能', trigger: 'blur' },
-          { min: 2, max: 25, message: '长度在 2 到 25 个字符', trigger: 'blur' }
+        redirect: [
+          { required: false, message: '请输入路径', trigger: 'blur' },
+          { validator: validatePath, trigger: 'blur' }
+        ],
+        'meta.title': [
+          { required: true, message: '请输入页面标题', trigger: 'blur' },
+          { min: 2, max: 8, message: '长度在 2 到 8 个字符', trigger: 'blur' }
+        ],
+        component: [
+          { required: true, message: '请输入正确的组件名', trigger: 'blur' }
         ]
       }
     }
   },
   watch: {
     assign() {
-      console.log('----assign---- ')
       this.roleInfo = deepClone(this.assign)
       this.iseditDefaultRoutes = false
-      console.log(this.roleInfo)
     },
     roleInfo() {
-      console.log('----roleInfo---- ')
       const routes = deepClone(this.roleInfo.routes)
       let data = []
       if (routes) {
         data = this.generateRoutes(routes)
       }
-      const realRoutes = this.generateRoutes(deepClone(this.serviceRoutes))
-      this.selected = this.getchecked(realRoutes, data)
+      this.realRoutes = deepClone(this.serviceRoutes)
+      this.selected = this.getchecked(this.generateRoutes(this.realRoutes), data)
+    },
+    realRoutes() {
+      if (this.iseditDefaultRoutes) {
+        this.selected = this.getchecked(this.generateRoutes(this.realRoutes), [])
+        console.log(this.selected)
+      }
     },
     checkedRoute() {
       if (this.checkedRoute.length === this.selected.length) {
@@ -314,13 +721,115 @@ export default {
         this.defaultRole = res.data
       })
     },
-    // cancel() {
-    //   console.log('------------------')
-    //   this.$nextTick(() => {
-    //     console.log(this.$refs)
-    //     this.$refs['popover-Dashboard-dele'][0].doClose()
-    //   })
-    // },
+    addChildRoutes(val) {
+      addChildRoutes(this.ChildrenRoute).then(res => {
+        if (res.data === 'success') {
+          this.$message({
+            showClose: true,
+            message: '子级页面信息新增成功！',
+            type: 'success'
+          })
+        }
+      }).catch(e => {
+        this.$message({
+          showClose: true,
+          message: '修改失败！错误信息：' + e,
+          type: 'error'
+        })
+      })
+    },
+    addRoutes() {
+      this.$refs.addRouteForm.validate(valid => {
+        if (valid) {
+          addRoutes(this.ParentRoute).then(res => {
+            if (res.data) {
+              this.ParentRoute.name = res.data
+              this.$message({
+                showClose: true,
+                message: '页面信息新增成功！',
+                type: 'success'
+              })
+              this.realRoutes.push(this.ParentRoute)
+              this.$refs[`popover-routes-add`].doClose()
+            }
+          }).catch(e => {
+            this.$message({
+              showClose: true,
+              message: '修改失败！错误信息：' + e,
+              type: 'error'
+            })
+          })
+        } else {
+          this.$message({
+            showClose: true,
+            message: '提交失败，请正确填写表单',
+            type: 'error'
+          })
+        }
+      })
+    },
+    updateRoutes(item) {
+      updateRoutes(this.ParentRoute).then(res => {
+        if (res.data === 'success') {
+          this.$message({
+            showClose: true,
+            message: '页面信息修改成功！',
+            type: 'success'
+          })
+          // eslint-disable-next-line no-unused-vars
+          for (const i in this.realRoutes) {
+            if (this.realRoutes[i].name === this.ParentRoute.name) {
+              this.realRoutes[i] = deepClone(this.ParentRoute)
+            }
+          }
+          this.selected = this.getchecked(this.generateRoutes(this.realRoutes), [])
+          // this.realRoutes.forEach(jtem => {
+          //   if (jtem.name === this.ParentRoute.name) {
+          //     jtem = deepClone(this.ParentRoute)
+          //   }
+          // })
+          console.log(this.realRoutes)
+          this.$refs[`popover-${item.name}-edit`][0].doClose()
+        }
+      }).catch(e => {
+        this.$message({
+          showClose: true,
+          message: '修改失败！错误信息：' + e,
+          type: 'error'
+        })
+      })
+    },
+    editChildRoute(isedit, val) {
+      if (isedit) {
+        console.log('------------')
+      } else {
+        this.ChildrenRoute = Object.assign({}, defaultChildrenRoute)
+        this.ChildrenRoute.meta = Object.assign({}, defaultMata)
+        this.ParentRouteName = val.name
+        console.log(val.name)
+      }
+    },
+    editRoute(isedit, val) {
+      if (isedit) {
+        if (this.$refs[`editRoute-${val.name}-form`][0] !== undefined) {
+          this.$refs[`editRoute-${val.name}-form`][0].resetFields()
+        }
+        const routes = deepClone(this.realRoutes)
+        let data = {}
+        routes.forEach(item => {
+          if (item.name === val.name) {
+            data = deepClone(item)
+          }
+        })
+        this.ParentRoute = data
+      } else {
+        if (this.$refs.addRouteForm !== undefined) {
+          this.$refs.addRouteForm.resetFields()
+        }
+        this.ParentRoute = Object.assign({}, defaultParentRoute)
+        this.ParentRoute.meta = Object.assign({}, defaultMata)
+      }
+    },
     confirmBtm() {
       this.roleInfo.routesCount = this.roleInfo.routesCount.filter(item => {
         return item.name !== this.buttomPMS.name
@@ -341,6 +850,7 @@ export default {
         list.push(item.name)
       })
       this.buttomPMS.hasBPMS = this.buttomPMS.checkAll ? list : []
+      this.isBtmIndeterminate = false
     },
     handleBtmCheckedChange(ischecked, name) {
       if (this.buttomPMS.hasBPMS.length === this.buttomPMS.realBPMS.length) {
@@ -580,7 +1090,7 @@ export default {
   color: white;
 }
 
-.icon-default-type{
+.icon-default-type {
   color: silver;
   margin-left: 5px;
   font-size: 15px;
@@ -588,8 +1098,20 @@ export default {
   display: inline-block;
 }
 
-.icon-default-type:hover{
+.icon-default-type:hover {
   color: slategray;
   cursor: pointer;
+}
+
+.add-icon-type {
+  position: absolute;
+  margin: 5px 0 0 90px;
+  font-size: 35px;
+  color: coral;
+  cursor: pointer;
+}
+
+.add-icon-type:hover{
+  color: red;
 }
 </style>
