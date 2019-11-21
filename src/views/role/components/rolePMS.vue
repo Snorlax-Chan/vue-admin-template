@@ -1129,6 +1129,7 @@ export default {
               if (jtem.name === this.buttomPMS.name) {
                 if (item.checked.indexOf(this.buttomPMS.name) < 0) {
                   item.checked.push(this.buttomPMS.name)
+                  item.isIndeterminate = true
                 }
               }
             })
