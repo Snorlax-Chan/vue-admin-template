@@ -176,9 +176,15 @@ export default {
   watch: {
   },
   mounted() {
-    searchEvent.$on('reCurrentRow', () => {
+    searchEvent.$on('offCurrentRow', () => {
       this.$nextTick(() => {
         this.$refs.singleTable.setCurrentRow()
+      })
+    })
+
+    searchEvent.$on('onCurrentRow', () => {
+      this.$nextTick(() => {
+        this.$refs.singleTable.setCurrentRow(this.tableData[0])
       })
     })
   },

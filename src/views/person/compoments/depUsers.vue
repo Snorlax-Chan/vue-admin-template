@@ -386,7 +386,7 @@
               >
                 <i class="el-icon-plus" />
               </el-upload>
-              <el-avatar slot="reference" :size="50" :src="userInfo.avatar">
+              <el-avatar slot="reference" :key="userInfo.avatar" :size="50" :src="userInfo.avatar">
                 <svg-icon icon-class="user-2" style="font-size: 50px;" />
               </el-avatar>
             </el-popover>
@@ -706,6 +706,7 @@ export default {
     handlePictureCardChange(file) {
       this.userInfo.file = file
       this.userInfo.avatar = file.url
+      console.log(this.userInfo)
     },
     downloadUsersModel() {
       downloadUsersModel().then(res => {

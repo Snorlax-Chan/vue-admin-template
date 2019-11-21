@@ -6,6 +6,15 @@
           <div slot="header">
             <span v-if="!iseditDefaultRoutes">详情页</span>
             <span v-else>默认角色及页面按钮等修改</span>
+            <span style="float:right">
+              <span>管理者模式</span>
+              <el-switch
+                v-model="iseditDefaultRoutes"
+                active-color="#13ce66"
+                inactive-color="#ff4949"
+                @change="editDefaultRoutes"
+              />
+            </span>
           </div>
           <el-scrollbar style="height: 70vh;">
             <div style="font-size:20px;">
@@ -346,20 +355,6 @@
           </el-scrollbar>
         </el-card>
       </el-col>
-      <transition name="el-zoom-in-top">
-        <el-col :span="9">
-          <el-card shadow="never">
-            <div slot="header">操作</div>
-            <el-alert title="点击下方按钮保存！" type="info" show-icon :closable="false" />
-            <el-button
-              type="success"
-              style="margin: 10px 0px 0px 30px;padding: 12px 80px 12px 80px;"
-              :loading="isloading"
-              @click="confirmRole"
-            >提交</el-button>
-          </el-card>
-        </el-col>
-      </transition>
       <transition name="el-zoom-in-bottom">
         <el-col v-if="isbuttomPMS" :span="9">
           <el-card shadow="never">
@@ -514,34 +509,20 @@
                 </el-checkbox>
               </el-checkbox-group>
             </div>
-            <el-button
-              v-if="(buttomPMS.realBPMS.length !== 0)"
-              type="success"
-              style="margin: 15px 0px 0px 30px;padding: 2px 80px;font-size: 30px;"
-              @click="isbuttomPMS = false"
-            >
-              <svg-icon icon-class="arrow-right-3" />
-            </el-button>
-            <el-button
-              v-else
-              type="success"
-              style="margin: 15px 0px 0px 30px;padding: 2px 80px;font-size: 30px;"
-              @click="isbuttomPMS=false;"
-            >
-              <svg-icon icon-class="arrow-right-3" />
-            </el-button>
           </el-card>
         </el-col>
       </transition>
       <transition name="el-zoom-in-top">
-        <el-col v-if="!isbuttomPMS" :span="9" style="margin-top:5px;">
+        <el-col :span="9" style="margin-top:5px;">
           <el-card shadow="never">
-            <el-alert title="点此新增页面和按钮！" type="info" show-icon :closable="false" />
+            <div slot="header">操作</div>
+            <el-alert title="点击下方按钮保存！" type="info" show-icon :closable="false" />
             <el-button
-              type="info"
-              style="margin: 10px 0px 0px 30px;padding: 12px 52px 12px 52px;"
-              @click="editDefaultRoutes"
-            >管理通用模版</el-button>
+              type="success"
+              style="margin: 10px 0px 0px 30px;padding: 12px 80px 12px 80px;"
+              :loading="isloading"
+              @click="confirmRole"
+            >提交</el-button>
           </el-card>
         </el-col>
       </transition>
@@ -801,7 +782,6 @@ export default {
           })
         }
       })
-      console.log(this.buttomPMS)
     },
     updateRoutes(item) {
       this.$refs[`editRoute-${item.name}-form`][0].validate(valid => {
@@ -863,7 +843,6 @@ export default {
                   if (jtem.children) {
                     // eslint-disable-next-line no-unused-vars
                     for (const i in jtem.children) {
-                      console.log(itemchild.name)
                       if (jtem.children[i].name === itemchild.name) {
                         jtem.children[i] = deepClone(this.ChildrenRoute)
                       }
@@ -1065,12 +1044,10 @@ export default {
     },
     editBtm(isedit, itbm) {
       if (isedit) {
-        console.log(this.$refs)
         if (this.$refs[`form-${itbm.name}-editBtm`][0] !== undefined) {
           this.$refs[`form-${itbm.name}-editBtm`][0].resetFields()
         }
         this.btmInfo = deepClone(itbm)
-        console.log(itbm)
       } else {
         if (this.$refs['route-newBtm-form'] !== undefined) {
           this.$refs['route-newBtm-form'].resetFields()
@@ -1085,11 +1062,15 @@ export default {
       this.roleInfo.routesCount.push(this.buttomPMS)
     },
     editDefaultRoutes() {
-      searchEvent.$emit('reCurrentRow')
-      setTimeout(() => {
-        this.iseditDefaultRoutes = true
-        this.roleInfo = deepClone(this.defaultRole)
-      }, 1000)
+      if (this.iseditDefaultRoutes) {
+        searchEvent.$emit('offCurrentRow')
+        setTimeout(() => {
+          this.iseditDefaultRoutes = true
+          this.roleInfo = deepClone(this.defaultRole)
+        }, 1000)
+      } else {
+        searchEvent.$emit('onCurrentRow')
+      }
     },
     handleBtmCheckAllChange() {
       const list = []
@@ -1145,12 +1126,20 @@ export default {
       this.buttomPMS = data.filter(item => {
         return item.name === name
       })[0]
+      if (this.buttomPMS.checkAll) {
+        this.isBtmIndeterminate = false
+      } else {
+        if (this.buttomPMS.hasBPMS.length > 0) {
+          this.isBtmIndeterminate = true
+        } else {
+          this.isBtmIndeterminate = false
+        }
+      }
     },
     confirmRole() {
       this.isloading = true
       const checkedNames = this.checkedRoute.concat(this.getcheckedArr(this.selected))
       this.roleInfo.routes = this.generateTree(deepClone(this.serviceRoutes), checkedNames)
-      console.log(this.roleInfo.routes)
       updateRole(this.roleInfo.id, this.roleInfo).then(res => {
         if (res.data.status === 'success') {
           this.isloading = false
@@ -1205,8 +1194,11 @@ export default {
       })
     },
     checkBPMS(totalBPMS, realBPMS) {
-      const data = totalBPMS
-      data.forEach(item => {
+      totalBPMS.forEach(item => {
+        item.checkAll = false
+        item.hasBPMS = []
+      })
+      totalBPMS.forEach(item => {
         if (realBPMS) {
           realBPMS.forEach(jtem => {
             if (jtem.name === item.name) {
@@ -1216,17 +1208,11 @@ export default {
               } else {
                 item.checkAll = false
               }
-            } else {
-              item.checkAll = false
-              item.hasBPMS = []
             }
           })
-        } else {
-          item.checkAll = false
-          item.hasBPMS = []
         }
       })
-      return data
+      return totalBPMS
     },
     getchecked(routes, selected = []) {
       const checkedRoute = []
