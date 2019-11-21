@@ -59,6 +59,13 @@ export function getdefaultRole() {
   })
 }
 
+export function getTotalBPMS() {
+  return request({
+    url: `/BPMS/TotalBPMS`,
+    method: 'get'
+  })
+}
+
 export function updateRoutes(routesInfo) {
   return request({
     url: `/update/updateRoutes`,
@@ -72,6 +79,14 @@ export function updateChildRoutes(patName, routesInfo) {
     url: `/update/updateChildRoutes`,
     method: 'post',
     data: { patName: patName, routesInfo: routesInfo }
+  })
+}
+
+export function updateBtm(patName, btmInfo) {
+  return request({
+    url: `/update/updateBtm`,
+    method: 'post',
+    data: { patName: patName, btmInfo: btmInfo }
   })
 }
 
@@ -91,6 +106,14 @@ export function addChildRoutes(routesInfo) {
   })
 }
 
+export function addBtm(patName, btmInfo) {
+  return request({
+    url: `/add/addBtm`,
+    method: 'post',
+    data: { patName: patName, btmInfo: btmInfo }
+  })
+}
+
 export function deleRoutes(routesName) {
   return request({
     url: `/dele/deleRoutes`,
@@ -104,5 +127,13 @@ export function deleChildRoutes(patName, routesName) {
     url: `/dele/deleChildRoutes`,
     method: 'post',
     data: { patName: patName, routesName: routesName }
+  })
+}
+
+export function deleBtm(patName, BtmName) {
+  return request({
+    url: `/dele/deleBtm`,
+    method: 'post',
+    data: { patName: patName, BtmName: BtmName }
   })
 }
