@@ -5,37 +5,38 @@
         <vxe-toolbar id="toolbar-type">
           <template v-slot:buttons>
             <span class="textType">成员({{ tablePage.totalResult }})</span>
-            <el-tooltip effect="dark" content="新增用户" placement="top">
+            <el-tooltip v-if="isShowBtm('NewUser')" effect="dark" content="新增用户" placement="top">
               <el-button round class="add-type" @click="EditUsers(false,'')">
                 <svg-icon icon-class="new-add" style="font-size:30px;vertical-align: middle;" />
               </el-button>
             </el-tooltip>
-            <el-tooltip effect="dark" content="批量调换部门" placement="top">
+            <el-tooltip v-if="isShowBtm('ChangeDep')" effect="dark" content="批量调换部门" placement="top">
               <el-button circle class="icon-type" @click="changeDep">
                 <svg-icon icon-class="pingyi" />
               </el-button>
             </el-tooltip>
-            <el-tooltip effect="dark" content="批量锁定用户" placement="top">
+            <el-tooltip v-if="isShowBtm('BatchLock')" effect="dark" content="批量锁定用户" placement="top">
               <el-button circle class="icon-type" @click="changeStatus(false)">
                 <svg-icon icon-class="lock" />
               </el-button>
             </el-tooltip>
-            <el-tooltip effect="dark" content="批量解除锁定" placement="top">
+            <el-tooltip v-if="isShowBtm('BatchUnLock')" effect="dark" content="批量解除锁定" placement="top">
               <el-button circle class="icon-type" @click="changeStatus(true)">
                 <svg-icon icon-class="unlock" />
               </el-button>
             </el-tooltip>
-            <el-tooltip effect="dark" content="批量删除" placement="top">
+            <el-tooltip v-if="isShowBtm('BatchDele')" effect="dark" content="批量删除" placement="top">
               <el-button circle class="icon-type" @click="deleUsers(false,'')">
                 <svg-icon icon-class="trash" />
               </el-button>
             </el-tooltip>
-            <el-tooltip effect="dark" content="批量上传" placement="top">
+            <el-tooltip v-if="isShowBtm('BatchUpdate')" effect="dark" content="批量上传" placement="top">
               <el-button circle class="icon-type" @click="uploadUsers">
                 <svg-icon icon-class="upload-1" />
               </el-button>
             </el-tooltip>
             <el-popover
+              v-if="isShowBtm('Export')"
               :ref="`popover-exportTable`"
               width="260"
               placement="top"
@@ -189,10 +190,10 @@
             </el-tooltip>
           </template>
         </vxe-table-column>
-        <vxe-table-column title="操作">
+        <vxe-table-column v-if="isShowBtm('EditUser')||isShowBtm('DeleUsers')" title="操作">
           <template v-slot="{row,$rowIndex}">
-            <vxe-button type="text" @click.stop="EditUsers(true,row)">编辑</vxe-button>
-            <el-popover :ref="`popover-${$rowIndex}`" width="160" placement="top">
+            <vxe-button v-if="isShowBtm('EditUser')" type="text" @click.stop="EditUsers(true,row)">编辑</vxe-button>
+            <el-popover v-if="isShowBtm('DeleUsers')" :ref="`popover-${$rowIndex}`" width="160" placement="top">
               <p>确定删除该项吗？</p>
               <div style="text-align: right; margin: 0">
                 <el-button
@@ -376,6 +377,7 @@
               popper-class="popper-avatar-type"
             >
               <el-upload
+                ref="avatar-update"
                 action
                 list-type="picture-card"
                 :limit="1"
@@ -386,9 +388,12 @@
               >
                 <i class="el-icon-plus" />
               </el-upload>
-              <el-avatar slot="reference" :key="userInfo.avatar" :size="50" :src="userInfo.avatar">
-                <svg-icon icon-class="user-2" style="font-size: 50px;" />
-              </el-avatar>
+              <span slot="reference">
+                <el-avatar :key="userInfo.id" :size="50">
+                  <el-image v-if="userInfo.avatar" :key="userInfo.id" :src="userInfo.avatar" :lazy="true" />
+                  <svg-icon v-else icon-class="user-2" style="font-size: 50px;" />
+                </el-avatar>
+              </span>
             </el-popover>
           </span>
         </div>
@@ -491,6 +496,7 @@
 </template>
 
 <script>
+import { mapGetters } from 'vuex'
 import { getTableData, getAlldep, changeDp, changeStatus, exportTable,
   deleUsers, updateUsers, addNewUsers, fileUpdate, downloadUsersModel } from '@/api/department'
 import { getRoles } from '@/api/role'
@@ -545,6 +551,8 @@ export default {
       drawer: false,
       visible: false,
       drawerTitle: '',
+      RoleEditPMS: [],
+      RoleEditPMSInfo: [],
       changeList: [],
       changedDep: [],
       depList: [],
@@ -580,6 +588,9 @@ export default {
     }
   },
   computed: {
+    ...mapGetters([
+      'rolesPMS'
+    ]),
     cloneTable() {
       return deepClone(this.tableData)
     }
@@ -619,6 +630,7 @@ export default {
     }
   },
   created() {
+    this.getRoleEditPMS()
     this.getTableData()
     this.getAlldep()
     this.getRoles()
@@ -644,6 +656,24 @@ export default {
       getAlldep().then(res => {
         this.depList = res.data
       })
+    },
+    getRoleEditPMS() {
+      const routeName = this.$route.name
+      const rolesPMS = this.rolesPMS
+      // eslint-disable-next-line no-unused-vars
+      for (const i of rolesPMS) {
+        if (i.name === routeName) {
+          this.RoleEditPMS = deepClone(i.hasBPMS)
+          this.RoleEditPMSInfo = deepClone(i.realBPMS)
+        }
+      }
+    },
+    isShowBtm(name) {
+      if (this.RoleEditPMS.indexOf(name) > -1) {
+        return true
+      } else {
+        return false
+      }
     },
     watchInput(value, context) {
       if (value.length === 0) {
@@ -675,8 +705,6 @@ export default {
           //   type: this.exportFormat.type,
           //   original: true
           // })
-          console.log('--------------')
-          console.log(this.exportFormat.data)
           import('@/vendor/Export2Excel').then(excel => {
             const defaultHeader = ['id', 'name', 'role', 'department', 'status', 'sex', 'email', 'content', 'date']
             const tHeader = ['序号', '姓名', '职业', '部门', '状态', '性别', '邮箱', '联系方式', '日期']
@@ -702,11 +730,16 @@ export default {
     handleRemove(file, fileList) {
       this.userInfo.file = ''
       this.userInfo.avatar = ''
+      if (this.drawerTitle === '编辑用户') {
+        this.$refs.infoForm.resetFields()
+      }
     },
     handlePictureCardChange(file) {
       this.userInfo.file = file
       this.userInfo.avatar = file.url
-      console.log(this.userInfo)
+      if (this.drawerTitle === '编辑用户') {
+        this.$refs.infoForm.resetFields()
+      }
     },
     downloadUsersModel() {
       downloadUsersModel().then(res => {
@@ -806,10 +839,13 @@ export default {
         this.userInfo = deepClone(row)
       } else {
         this.userInfo = Object.assign({}, defaultUserInfo)
+        this.$refs['avatar-update'].clearFiles()
       }
     },
     changeSingleStatus(row) {
-      row.status = !row.status
+      if (this.isShowBtm('LockUser')) {
+        row.status = !row.status
+      }
     },
     sortChange({ column, property, order }) {
       this.property = property

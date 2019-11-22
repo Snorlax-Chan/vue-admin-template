@@ -20,25 +20,157 @@ const roleEditPMS = [
       name: 'Person',
       title: '人员管理',
       checkAll: true,
-      hasBPMS: [],
-      realBPMS: []
+      hasBPMS: ['NewOrgan', 'NewChildOrgan', 'EditOrgan', 'DeleOrgan', 'NewUser', 'ChangeDep', 'BatchLock', 'BatchUnLock', 'BatchDele', 'BatchUpdate', 'Export', 'LockUser', 'EditUser', 'DeleUsers'],
+      realBPMS: [{
+        name: 'NewOrgan',
+        title: '新建组织',
+        attach: ''
+      },
+      {
+        name: 'NewChildOrgan',
+        title: '新建子部门',
+        attach: ''
+      },
+      {
+        name: 'EditOrgan',
+        title: '修改部门',
+        attach: ''
+      },
+      {
+        name: 'DeleOrgan',
+        title: '删除部门',
+        attach: ''
+      },
+      {
+        name: 'NewUser',
+        title: '新建用户',
+        attach: ''
+      },
+      {
+        name: 'ChangeDep',
+        title: '调换部门',
+        attach: ''
+      },
+      {
+        name: 'BatchLock',
+        title: '批量锁定',
+        attach: ''
+      },
+      {
+        name: 'BatchUnLock',
+        title: '批量解锁',
+        attach: ''
+      },
+      {
+        name: 'BatchDele',
+        title: '批量删除',
+        attach: ''
+      },
+      {
+        name: 'BatchUpdate',
+        title: '批量上传',
+        attach: ''
+      },
+      {
+        name: 'Export',
+        title: '导出',
+        attach: ''
+      },
+      {
+        name: 'LockUser',
+        title: '锁定用户',
+        attach: ''
+      },
+      {
+        name: 'EditUser',
+        title: '编辑用户',
+        attach: ''
+      },
+      {
+        name: 'DeleUsers',
+        title: '删除用户',
+        attach: ''
+      }]
     },
     {
       name: 'Role',
       title: '角色权限',
       checkAll: true,
-      hasBPMS: ['NewRole', 'EditRole', 'DeleRole'],
+      hasBPMS: ['NewRole', 'EditRole', 'DeleRole', 'AdminPMS', 'NewPage', 'EditPage', 'SetButtom', 'DelePage', 'NewChildPage', 'NewButtom', 'EditButtom', 'DeleButtom', 'SubmitRoute'],
       realBPMS: [{
         name: 'NewRole',
-        title: '新建角色'
+        title: '新建角色',
+        attach: ''
       },
       {
         name: 'EditRole',
-        title: '编辑角色'
+        title: '编辑角色',
+        attach: ''
       },
       {
         name: 'DeleRole',
-        title: '删除角色'
+        title: '删除角色',
+        attach: ''
+      },
+      {
+        name: 'AdminPMS',
+        title: '管理者模式',
+        attach: ''
+      },
+      {
+        name: 'NewPage',
+        title: '新建页面',
+        attach: ''
+      },
+      {
+        name: 'EditPage',
+        title: '修改页面',
+        attach: ''
+      },
+      {
+        name: 'SetButtom',
+        title: '设置按钮',
+        attach: ''
+      },
+      {
+        name: 'DelePage',
+        title: '删除页面',
+        attach: ''
+      },
+      {
+        name: 'NewChildPage',
+        title: '新增子级页面',
+        attach: ''
+      },
+      {
+        name: 'EditChildPage',
+        title: '编辑子级页面',
+        attach: ''
+      },
+      {
+        name: 'DeleChildPage',
+        title: '删除子级页面',
+        attach: ''
+      },
+      {
+        name: 'NewButtom',
+        title: '新建按钮',
+        attach: ''
+      },
+      {
+        name: 'EditButtom',
+        title: '编辑按钮',
+        attach: ''
+      },
+      {
+        name: 'DeleButtom',
+        title: '删除按钮',
+        attach: ''
+      },
+      {
+        name: 'SubmitRoute',
+        title: '提交路由',
+        attach: ''
       }
       ]
     },
@@ -120,15 +252,18 @@ const roleEditPMS = [
       hasBPMS: [],
       realBPMS: [{
         name: 'NewRole',
-        title: '新建角色'
+        title: '新建角色',
+        attach: ''
       },
       {
         name: 'EditRole',
-        title: '编辑角色'
+        title: '编辑角色',
+        attach: ''
       },
       {
         name: 'DeleRole',
-        title: '删除角色'
+        title: '删除角色',
+        attach: ''
       }
       ]
     },
@@ -168,6 +303,228 @@ const roleEditPMS = [
       realBPMS: []
     }
     ]
+  },
+  {
+    id: '3',
+    key: 'tester',
+    name: '测试员',
+    description: '我是一个测试员，拥有所有页面权限，但没有任何按钮权限',
+    routes: asyncRoutes,
+    routesCount: [{
+      name: 'Dashboard',
+      title: '首页',
+      checkAll: true,
+      hasBPMS: [],
+      realBPMS: []
+    },
+    {
+      name: 'Person',
+      title: '人员管理',
+      checkAll: true,
+      hasBPMS: [],
+      realBPMS: [{
+        name: 'NewOrgan',
+        title: '新建组织',
+        attach: ''
+      },
+      {
+        name: 'NewChildOrgan',
+        title: '新建子部门',
+        attach: ''
+      },
+      {
+        name: 'EditOrgan',
+        title: '修改部门',
+        attach: ''
+      },
+      {
+        name: 'DeleOrgan',
+        title: '删除部门',
+        attach: ''
+      },
+      {
+        name: 'NewUser',
+        title: '新建用户',
+        attach: ''
+      },
+      {
+        name: 'ChangeDep',
+        title: '调换部门',
+        attach: ''
+      },
+      {
+        name: 'BatchLock',
+        title: '批量锁定',
+        attach: ''
+      },
+      {
+        name: 'BatchUnLock',
+        title: '批量解锁',
+        attach: ''
+      },
+      {
+        name: 'BatchDele',
+        title: '批量删除',
+        attach: ''
+      },
+      {
+        name: 'BatchUpdate',
+        title: '批量上传',
+        attach: ''
+      },
+      {
+        name: 'Export',
+        title: '导出',
+        attach: ''
+      },
+      {
+        name: 'LockUser',
+        title: '锁定用户',
+        attach: ''
+      },
+      {
+        name: 'EditUser',
+        title: '编辑用户',
+        attach: ''
+      },
+      {
+        name: 'DeleUsers',
+        title: '删除用户',
+        attach: ''
+      }]
+    },
+    {
+      name: 'Role',
+      title: '角色权限',
+      checkAll: true,
+      hasBPMS: ['SubmitRoute', 'SetButtom'],
+      realBPMS: [{
+        name: 'NewRole',
+        title: '新建角色',
+        attach: ''
+      },
+      {
+        name: 'EditRole',
+        title: '编辑角色',
+        attach: ''
+      },
+      {
+        name: 'DeleRole',
+        title: '删除角色',
+        attach: ''
+      },
+      {
+        name: 'AdminPMS',
+        title: '管理者模式',
+        attach: ''
+      },
+      {
+        name: 'NewPage',
+        title: '新建页面',
+        attach: ''
+      },
+      {
+        name: 'EditPage',
+        title: '修改页面',
+        attach: ''
+      },
+      {
+        name: 'SetButtom',
+        title: '设置按钮',
+        attach: ''
+      },
+      {
+        name: 'DelePage',
+        title: '删除页面',
+        attach: ''
+      },
+      {
+        name: 'NewChildPage',
+        title: '新增子级页面',
+        attach: ''
+      },
+      {
+        name: 'EditChildPage',
+        title: '编辑子级页面',
+        attach: ''
+      },
+      {
+        name: 'DeleChildPage',
+        title: '删除子级页面',
+        attach: ''
+      },
+      {
+        name: 'NewButtom',
+        title: '新建按钮',
+        attach: ''
+      },
+      {
+        name: 'EditButtom',
+        title: '编辑按钮',
+        attach: ''
+      },
+      {
+        name: 'DeleButtom',
+        title: '删除按钮',
+        attach: ''
+      },
+      {
+        name: 'SubmitRoute',
+        title: '提交路由',
+        attach: ''
+      }
+      ]
+    },
+    {
+      name: 'Form',
+      title: '表格',
+      checkAll: true,
+      hasBPMS: [],
+      realBPMS: []
+    },
+    {
+      name: 'Nested',
+      title: '扩展',
+      checkAll: true,
+      hasBPMS: [],
+      realBPMS: []
+    },
+    {
+      name: 'Menu1',
+      title: '菜单一',
+      checkAll: false,
+      hasBPMS: [],
+      realBPMS: []
+    },
+    {
+      name: 'Menu2',
+      title: '菜单二',
+      checkAll: false,
+      hasBPMS: [],
+      realBPMS: []
+    },
+    {
+      name: 'External',
+      title: '外链',
+      checkAll: false,
+      hasBPMS: [],
+      realBPMS: []
+    },
+    {
+      name: 'Permission',
+      title: '权限管理',
+      checkAll: false,
+      hasBPMS: [],
+      realBPMS: []
+    },
+    {
+      name: 'Nested',
+      title: 'Nested',
+      checkAll: false,
+      hasBPMS: [],
+      realBPMS: []
+    }
+    ]
   }
 ]
 
@@ -198,15 +555,18 @@ const defaultRole = {
     hasBPMS: [],
     realBPMS: [{
       name: 'NewRole',
-      title: '新建角色'
+      title: '新建角色',
+      attach: ''
     },
     {
       name: 'EditRole',
-      title: '编辑角色'
+      title: '编辑角色',
+      attach: ''
     },
     {
       name: 'DeleRole',
-      title: '删除角色'
+      title: '删除角色',
+      attach: ''
     }
     ]
   },
@@ -257,22 +617,154 @@ const totalBPMS = [
   {
     name: 'Person',
     title: '人员管理',
-    realBPMS: []
+    realBPMS: [{
+      name: 'NewOrgan',
+      title: '新建组织',
+      attach: ''
+    },
+    {
+      name: 'NewChildOrgan',
+      title: '新建子部门',
+      attach: ''
+    },
+    {
+      name: 'EditOrgan',
+      title: '修改部门',
+      attach: ''
+    },
+    {
+      name: 'DeleOrgan',
+      title: '删除部门',
+      attach: ''
+    },
+    {
+      name: 'NewUser',
+      title: '新建用户',
+      attach: ''
+    },
+    {
+      name: 'ChangeDep',
+      title: '调换部门',
+      attach: ''
+    },
+    {
+      name: 'BatchLock',
+      title: '批量锁定',
+      attach: ''
+    },
+    {
+      name: 'BatchUnLock',
+      title: '批量解锁',
+      attach: ''
+    },
+    {
+      name: 'BatchDele',
+      title: '批量删除',
+      attach: ''
+    },
+    {
+      name: 'BatchUpdate',
+      title: '批量上传',
+      attach: ''
+    },
+    {
+      name: 'Export',
+      title: '导出',
+      attach: ''
+    },
+    {
+      name: 'LockUser',
+      title: '锁定用户',
+      attach: ''
+    },
+    {
+      name: 'EditUser',
+      title: '编辑用户',
+      attach: ''
+    },
+    {
+      name: 'DeleUsers',
+      title: '删除用户',
+      attach: ''
+    }]
   },
   {
     name: 'Role',
     title: '角色权限',
     realBPMS: [{
       name: 'NewRole',
-      title: '新建角色'
+      title: '新建角色',
+      attach: ''
     },
     {
       name: 'EditRole',
-      title: '编辑角色'
+      title: '编辑角色',
+      attach: ''
     },
     {
       name: 'DeleRole',
-      title: '删除角色'
+      title: '删除角色',
+      attach: ''
+    },
+    {
+      name: 'AdminPMS',
+      title: '管理者模式',
+      attach: ''
+    },
+    {
+      name: 'NewPage',
+      title: '新建页面',
+      attach: ''
+    },
+    {
+      name: 'EditPage',
+      title: '修改页面',
+      attach: ''
+    },
+    {
+      name: 'SetButtom',
+      title: '设置按钮',
+      attach: ''
+    },
+    {
+      name: 'DelePage',
+      title: '删除页面',
+      attach: ''
+    },
+    {
+      name: 'NewChildPage',
+      title: '新增子级页面',
+      attach: ''
+    },
+    {
+      name: 'EditChildPage',
+      title: '编辑子级页面',
+      attach: ''
+    },
+    {
+      name: 'DeleChildPage',
+      title: '删除子级页面',
+      attach: ''
+    },
+    {
+      name: 'NewButtom',
+      title: '新建按钮',
+      attach: ''
+    },
+    {
+      name: 'EditButtom',
+      title: '编辑按钮',
+      attach: ''
+    },
+    {
+      name: 'DeleButtom',
+      title: '删除按钮',
+      attach: ''
+    },
+    {
+      name: 'SubmitRoute',
+      title: '提交路由',
+      attach: ''
     }
     ]
   },

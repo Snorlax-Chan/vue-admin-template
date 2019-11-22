@@ -12,9 +12,6 @@
           </el-col>
         </el-row>
       </el-tab-pane>
-      <el-tab-pane label="角色页面权限" style="height:100vh;">
-        <role-permission />
-      </el-tab-pane>
     </el-tabs>
   </div>
 </template>
@@ -22,14 +19,13 @@
 <script>
 // import RoleTable from './components/roleTable'
 import RolePms from './components/rolePMS'
-import RolePermission from './components/rolePermission'
+// import RolePermission from './components/rolePermission'
 import TableMenu from './components/tableMenu'
 export default {
   name: 'Role',
   components: {
     // RoleTable,
     RolePms,
-    RolePermission,
     TableMenu
   },
   data() {

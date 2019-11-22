@@ -101,7 +101,6 @@ const actions = {
         if (!roleEditPMS || roleEditPMS.length <= 0) {
           reject('getRoleEditPMS: roleEditPMS must be a non-null array!')
         }
-
         commit('SET_ROLESPMS', roleEditPMS)
         resolve()
       })

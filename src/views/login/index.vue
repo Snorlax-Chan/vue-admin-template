@@ -72,7 +72,7 @@
       >登录</el-button>
 
       <div class="tips">
-        <span style="margin-right:20px;">用户名可选: admin/editor</span>
+        <span style="margin-right:20px;">用户名可选: admin/editor/tester</span>
         <span>密码: 随便输入</span>
       </div>
     </el-form>

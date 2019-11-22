@@ -6,7 +6,7 @@
           <div slot="header">
             <span v-if="!iseditDefaultRoutes">详情页</span>
             <span v-else>默认角色及页面按钮等修改</span>
-            <span style="float:right">
+            <span v-if="isShowBtm('AdminPMS')" style="float:right">
               <span>管理者模式</span>
               <el-switch
                 v-model="iseditDefaultRoutes"
@@ -27,7 +27,7 @@
             <el-divider content-position="left">
               <svg-icon icon-class="page" style="margin-right: 10px;font-size:18px;" />页面权限
               <el-popover
-                v-if="iseditDefaultRoutes"
+                v-if="iseditDefaultRoutes&&isShowBtm('AdminPMS')&&isShowBtm('NewPage')"
                 :ref="`popover-routes-add`"
                 width="360"
                 placement="top"
@@ -76,7 +76,7 @@
                     <el-button type="danger" size="mini" @click="addRoutes()">确定</el-button>
                   </div>
                 </el-card>
-                <span slot="reference" class="icon-default-type" @click.stop="editRoute(false,'')">
+                <span slot="reference" class="icon-default-type" title="新增页面" @click.stop="editRoute(false,'')">
                   <svg-icon
                     icon-class="add-a-subscription"
                     class="add-icon-type"
@@ -104,7 +104,7 @@
                       @change="handleCheckChange($event,item)"
                     >&nbsp;</el-checkbox>
                     <span style="font-size:16px;">{{ item.title }}</span>
-                    <el-tooltip effect="dark" content="设置按钮权限" placement="bottom-start">
+                    <el-tooltip v-if="isShowBtm('SetButtom')" effect="dark" content="设置按钮权限" placement="bottom-start">
                       <el-button type="text" @click.stop="showButtomPMS(item.name)">
                         <span class="icon-type">
                           <svg-icon icon-class="setting-2" />
@@ -112,7 +112,7 @@
                       </el-button>
                     </el-tooltip>
                     <el-popover
-                      v-if="iseditDefaultRoutes"
+                      v-if="iseditDefaultRoutes&&isShowBtm('AdminPMS')&&isShowBtm('EditPage')"
                       :ref="`popover-${item.name}-edit`"
                       width="360"
                       placement="right"
@@ -170,7 +170,7 @@
                       </span>
                     </el-popover>
                     <el-popover
-                      v-if="iseditDefaultRoutes"
+                      v-if="iseditDefaultRoutes&&isShowBtm('AdminPMS')&&isShowBtm('DelePage')"
                       :ref="`popover-${item.name}-dele`"
                       width="160"
                       placement="top"
@@ -193,7 +193,7 @@
                       </span>
                     </el-popover>
                     <el-popover
-                      v-if="iseditDefaultRoutes"
+                      v-if="iseditDefaultRoutes&&isShowBtm('AdminPMS')&&isShowBtm('NewChildPage')"
                       :ref="`popover-${item.name}-add`"
                       width="360"
                       placement="right"
@@ -257,7 +257,7 @@
                         @change="handleGroupCheckChange($event,item)"
                       >
                         {{ itemchild.title }}
-                        <el-tooltip effect="dark" content="设置按钮权限" placement="bottom-start">
+                        <el-tooltip v-if="isShowBtm('SetButtom')" effect="dark" content="设置按钮权限" placement="bottom-start">
                           <el-button type="text" @click.stop="showButtomPMS(itemchild.name)">
                             <span class="icon-type">
                               <svg-icon icon-class="setting-2" />
@@ -266,7 +266,7 @@
                         </el-tooltip>
                         <el-button type="text" style="margin-left: -5px;">
                           <el-popover
-                            v-if="iseditDefaultRoutes"
+                            v-if="iseditDefaultRoutes&&isShowBtm('AdminPMS')&&isShowBtm('EditChildPage')"
                             :ref="`popover-${item.name}-editchild`"
                             width="360"
                             placement="right"
@@ -323,7 +323,7 @@
                         </el-button>
                         <el-button type="text" style="margin-left:-5px;">
                           <el-popover
-                            v-if="iseditDefaultRoutes"
+                            v-if="iseditDefaultRoutes&&isShowBtm('AdminPMS')&&isShowBtm('DeleChildPage')"
                             :ref="`popover-${item.name}-deleChild`"
                             width="160"
                             placement="top"
@@ -355,6 +355,21 @@
           </el-scrollbar>
         </el-card>
       </el-col>
+      <transition name="el-zoom-in-top">
+        <el-col :span="9" style="margin-top:5px;">
+          <el-card shadow="never">
+            <div slot="header">操作</div>
+            <el-alert title="点击下方按钮保存！" type="info" show-icon :closable="false" />
+            <el-button
+              v-if="isShowBtm('SubmitRoute')"
+              type="success"
+              style="margin: 10px 0px 0px 30px;padding: 12px 80px 12px 80px;"
+              :loading="isloading"
+              @click="confirmRole"
+            >提交</el-button>
+          </el-card>
+        </el-col>
+      </transition>
       <transition name="el-zoom-in-bottom">
         <el-col v-if="isbuttomPMS" :span="9">
           <el-card shadow="never">
@@ -369,7 +384,7 @@
             <el-divider content-position="left">
               <svg-icon icon-class="setting-2" style="margin-right: 10px;font-size:18px;" />按钮权限
               <el-popover
-                v-if="iseditDefaultRoutes"
+                v-if="iseditDefaultRoutes&&isShowBtm('AdminPMS')&&isShowBtm('NewButtom')"
                 :ref="`popover-route-newBtm`"
                 width="360"
                 placement="right"
@@ -384,13 +399,16 @@
                     ref="route-newBtm-form"
                     :rules="rules"
                     :model="btmInfo"
-                    label-width="260px"
+                    label-width="80px"
                     validate-on-rule-change
                     status-icon
-                    label-position="top"
+                    label-position="right"
                   >
-                    <el-form-item label="按钮名(title)" prop="title">
+                    <el-form-item label="按钮名" prop="title">
                       <el-input v-model="btmInfo.title" clearable />
+                    </el-form-item>
+                    <el-form-item label="附加">
+                      <el-input v-model="btmInfo.attach" clearable type="textarea" />
                     </el-form-item>
                   </el-form>
                   <div style="text-align: right; margin: 0">
@@ -406,7 +424,7 @@
                     >确定</el-button>
                   </div>
                 </el-card>
-                <span slot="reference" @click.stop="(editBtm(false,''))">
+                <span slot="reference" title="新增按钮" @click.stop="editBtm(false,'')">
                   <svg-icon
                     v-if="iseditDefaultRoutes"
                     icon-class="add-a-subscription"
@@ -433,13 +451,13 @@
                   v-for="(itbm,index) in buttomPMS.realBPMS"
                   :key="itbm.id"
                   :label="itbm.name"
-                  style="margin-right:6px;"
+                  style="margin-right:30px;"
                   @change="handleBtmCheckedChange(itbm.name)"
                 >
                   {{ itbm.title }}
                   <el-button type="text" style="margin-left: -5px;">
                     <el-popover
-                      v-if="iseditDefaultRoutes"
+                      v-if="iseditDefaultRoutes&&isShowBtm('AdminPMS')&&isShowBtm('EditButtom')"
                       :ref="`popover-${itbm.name}-editBtm`"
                       width="360"
                       placement="right"
@@ -459,8 +477,11 @@
                           status-icon
                           label-position="top"
                         >
-                          <el-form-item label="按钮名(title)" prop="title">
+                          <el-form-item label="按钮名" prop="title">
                             <el-input v-model="btmInfo.title" clearable />
+                          </el-form-item>
+                          <el-form-item label="附加">
+                            <el-input v-model="btmInfo.attach" clearable />
                           </el-form-item>
                         </el-form>
                         <div style="text-align: right; margin: 0">
@@ -483,7 +504,7 @@
                   </el-button>
                   <el-button type="text" style="margin-left:-5px;">
                     <el-popover
-                      v-if="iseditDefaultRoutes"
+                      v-if="iseditDefaultRoutes&&isShowBtm('AdminPMS')&&isShowBtm('DeleButtom')"
                       :ref="`popover-${itbm.name}-deleBtm`"
                       width="160"
                       placement="top"
@@ -512,26 +533,13 @@
           </el-card>
         </el-col>
       </transition>
-      <transition name="el-zoom-in-top">
-        <el-col :span="9" style="margin-top:5px;">
-          <el-card shadow="never">
-            <div slot="header">操作</div>
-            <el-alert title="点击下方按钮保存！" type="info" show-icon :closable="false" />
-            <el-button
-              type="success"
-              style="margin: 10px 0px 0px 30px;padding: 12px 80px 12px 80px;"
-              :loading="isloading"
-              @click="confirmRole"
-            >提交</el-button>
-          </el-card>
-        </el-col>
-      </transition>
     </el-row>
   </div>
 </template>
 
 <script>
 import path from 'path'
+import { mapGetters } from 'vuex'
 import { deepClone } from '@/utils'
 import { updateRole, getRoutes, getdefaultRole, updateRoutes, addRoutes,
   addChildRoutes, deleRoutes, updateChildRoutes, deleChildRoutes, getTotalBPMS, addBtm, updateBtm, deleBtm } from '@/api/role'
@@ -558,7 +566,8 @@ const defaultChildrenRoute = {
 
 const defaultBtmInfo = {
   name: '',
-  title: ''
+  title: '',
+  attach: ''
 }
 export default {
   props: {
@@ -585,6 +594,8 @@ export default {
       isbuttomPMS: false,
       isloading: false,
       iseditDefaultRoutes: false,
+      RoleEditPMS: [],
+      RoleEditPMSInfo: [],
       defaultRole: {},
       totalBPMS: {},
       roleInfo: [],
@@ -617,6 +628,11 @@ export default {
         ]
       }
     }
+  },
+  computed: {
+    ...mapGetters([
+      'rolesPMS'
+    ])
   },
   watch: {
     assign() {
@@ -652,6 +668,7 @@ export default {
     }
   },
   created() {
+    this.getRoleEditPMS()
     this.getRoutes()
     this.getdefaultRole()
     this.getTotalBPMS()
@@ -670,6 +687,24 @@ export default {
       getTotalBPMS().then(res => {
         this.totalBPMS = res.data
       })
+    },
+    getRoleEditPMS() {
+      const routeName = this.$route.name
+      const rolesPMS = this.rolesPMS
+      // eslint-disable-next-line no-unused-vars
+      for (const i of rolesPMS) {
+        if (i.name === routeName) {
+          this.RoleEditPMS = i.hasBPMS
+          this.RoleEditPMSInfo = i.realBPMS
+        }
+      }
+    },
+    isShowBtm(name) {
+      if (this.RoleEditPMS.indexOf(name) > -1) {
+        return true
+      } else {
+        return false
+      }
     },
     addChildRoutes(item) {
       this.$refs[`addChildRoute-${item.name}-Form`][0].validate(valid => {
@@ -884,6 +919,7 @@ export default {
                   item.realBPMS.forEach(jtem => {
                     if (jtem.name === this.btmInfo.name) {
                       jtem.title = this.btmInfo.title
+                      jtem.attch = this.btmInfo.attach
                     }
                   })
                   // for (const i in item.realBPMS) {
@@ -1085,6 +1121,7 @@ export default {
       }
     },
     handleBtmCheckedChange(ischecked, name) {
+      console.log(this.buttomPMS.has)
       if (this.buttomPMS.hasBPMS.length === this.buttomPMS.realBPMS.length) {
         this.buttomPMS.checkAll = true
         this.isBtmIndeterminate = false
@@ -1390,7 +1427,7 @@ export default {
 
 .add-icon-type {
   position: absolute;
-  margin: 5px 0 0 90px;
+  margin-left: 70%;
   font-size: 35px;
   color: coral;
   cursor: pointer;

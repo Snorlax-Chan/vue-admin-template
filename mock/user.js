@@ -7,7 +7,7 @@ export const asyncRoutes = [
     component: 'Layout',
     redirect: '/dashboard',
     name: 'PrDashboard',
-    meta: { title: '首页', icon: 'dashboard', affix: true },
+    meta: { title: '首页项', icon: 'dashboard' },
     children: [
       {
         path: 'dashboard',
@@ -150,6 +150,13 @@ export const roles = [
     name: '用户',
     description: '我是一个普通，只有特定权限',
     routes: test
+  },
+  {
+    id: '3',
+    key: 'test',
+    name: '超级管理员',
+    description: '我是一个测试员，拥有所有页面权限，但没有任何按钮权限',
+    routes: asyncRoutes
   }
 ]
 
@@ -159,6 +166,9 @@ const tokens = {
   },
   editor: {
     token: 'editor-token'
+  },
+  tester: {
+    token: 'tester-token'
   }
 }
 
@@ -167,15 +177,19 @@ const users = {
     roles: ['1'],
     introduction: 'I am a super administrator',
     avatar: 'https://wpimg.wallstcn.com/f778738c-e4f8-4870-b634-56703b4acafe.gif',
-    name: 'Super Admin',
-    department: 'Super'
+    name: 'Super Admin'
   },
   'editor-token': {
     roles: ['2'],
     introduction: 'I am an editor',
     avatar: 'https://wpimg.wallstcn.com/f778738c-e4f8-4870-b634-56703b4acafe.gif',
-    name: 'Normal Editor',
-    department: '人事部'
+    name: 'Normal Editor'
+  },
+  'tester-token': {
+    roles: ['3'],
+    introduction: 'I am a test ',
+    avatar: 'https://wpimg.wallstcn.com/f778738c-e4f8-4870-b634-56703b4acafe.gif',
+    name: 'Tester'
   }
 }
 

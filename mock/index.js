@@ -6,8 +6,9 @@ import user from './user'
 import table from './table'
 import role from './role'
 import department from './department'
+import search from './remote-search'
 
-const mocks = [...user, ...table, ...role, ...department]
+const mocks = [...user, ...table, ...role, ...department, ...search]
 
 // for front mock
 // please use it cautiously, it will redefine XMLHttpRequest,

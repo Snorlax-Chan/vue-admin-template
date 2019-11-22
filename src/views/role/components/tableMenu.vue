@@ -3,7 +3,7 @@
     <el-card class="box-card" shadow="never" style="height: 80vh;">
       <div slot="header" class="clearfix">
         <span>角色列表</span>
-        <el-popover :ref="`popover-add`" width="360" placement="top">
+        <el-popover v-if="isShowBtm('NewRole')" :ref="`popover-add`" width="360" placement="top">
           <div style="padding-bottom: 15px;text-align: center;font-size: 18px;font-weight: 900;"><span>新建角色</span></div>
           <el-card shadow="never">
             <el-form
@@ -79,7 +79,7 @@
         <el-table-column property="name" label="角色名">
           <template slot-scope="scope">
             <span>{{ scope.row.name }}</span>
-            <el-popover :ref="`popover-${scope.row.id}-dele`" width="160" placement="top">
+            <el-popover v-if="isShowBtm('DeleRole')" :ref="`popover-${scope.row.id}-dele`" width="160" placement="top">
               <p>确定删除该项吗？</p>
               <div style="text-align: right; margin: 0">
                 <el-button
@@ -98,7 +98,7 @@
               </span>
             </el-popover>
 
-            <el-popover :ref="`popover-${scope.row.id}-edit`" width="360" placement="top">
+            <el-popover v-if="isShowBtm('EditRole')" :ref="`popover-${scope.row.id}-edit`" width="360" placement="top">
               <div style="padding-bottom: 15px;text-align: center;font-size: 18px;font-weight: 900;"><span>编辑角色</span></div>
               <el-card shadow="never">
                 <el-form
@@ -141,6 +141,7 @@
 </template>
 
 <script>
+import { mapGetters } from 'vuex'
 import { getRoleAllEditPMS, updateRole, addRole, getdefaultRole } from '@/api/role'
 import { deepClone } from '@/utils'
 import searchEvent from './SearchEvent'
@@ -155,6 +156,8 @@ const defaultRole = {
 export default {
   data() {
     return {
+      RoleEditPMS: [],
+      RoleEditPMSInfo: [],
       tableData: [],
       roleAllPMS: [],
       defaultRole: {},
@@ -173,7 +176,10 @@ export default {
       }
     }
   },
-  watch: {
+  computed: {
+    ...mapGetters([
+      'rolesPMS'
+    ])
   },
   mounted() {
     searchEvent.$on('offCurrentRow', () => {
@@ -189,6 +195,7 @@ export default {
     })
   },
   created() {
+    this.getRoleEditPMS()
     this.getdefaultRole()
     getRoleAllEditPMS().then(res => {
       this.tableData = deepClone(res.data)
@@ -205,6 +212,24 @@ export default {
       getdefaultRole().then(res => {
         this.defaultRole = res.data
       })
+    },
+    getRoleEditPMS() {
+      const routeName = this.$route.name
+      const rolesPMS = this.rolesPMS
+      // eslint-disable-next-line no-unused-vars
+      for (const i of rolesPMS) {
+        if (i.name === routeName) {
+          this.RoleEditPMS = i.hasBPMS
+          this.RoleEditPMSInfo = i.realBPMS
+        }
+      }
+    },
+    isShowBtm(name) {
+      if (this.RoleEditPMS.indexOf(name) > -1) {
+        return true
+      } else {
+        return false
+      }
     },
     clonePMS(item) {
       this.routeName = item.name

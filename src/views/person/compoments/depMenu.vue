@@ -3,14 +3,14 @@
     <el-card class="box-card" shadow="never">
       <div slot="header" class="clearfix">
         <span>组织架构</span>
-        <el-dropdown class="el-dropdown-link" trigger="click" @command="handleCommand($event,[])">
+        <el-dropdown v-if="isShowBtm('NewOrgan')" class="el-dropdown-link" trigger="click" @command="handleCommand($event,[])">
           <el-button
             type="text"
             @click.stop=""
           >
             <svg-icon icon-class="more" />
           </el-button>
-          <el-dropdown-menu slot="dropdown">
+          <el-dropdown-menu v-if="isShowBtm('NewOrgan')" slot="dropdown">
             <el-dropdown-item command="addOrgan">添加组织</el-dropdown-item>
           </el-dropdown-menu>
         </el-dropdown>
@@ -36,7 +36,7 @@
         <vxe-table-column field="name" title="Date" tree-node>
           <template v-slot="{row}">
             {{ row.name }}
-            <el-dropdown class="el-dropdown-link" trigger="click" @command="handleCommand($event,row)">
+            <el-dropdown v-if="isShowBtm('NewChildOrgan')||isShowBtm('EditOrgan')||isShowBtm('DeleOrgan')" class="el-dropdown-link" trigger="click" @command="handleCommand($event,row)">
               <el-button
                 type="text"
                 @click.stop=""
@@ -44,9 +44,9 @@
                 <svg-icon icon-class="more" />
               </el-button>
               <el-dropdown-menu slot="dropdown">
-                <el-dropdown-item command="addChild">添加子部门</el-dropdown-item>
-                <el-dropdown-item command="editChild">修改</el-dropdown-item>
-                <el-popover :ref="`popover-${row.id}-dele`" width="160" placement="top">
+                <el-dropdown-item v-if="isShowBtm('NewChildOrgan')" command="addChild">添加子部门</el-dropdown-item>
+                <el-dropdown-item v-if="isShowBtm('EditOrgan')" command="editChild">修改</el-dropdown-item>
+                <el-popover v-if="isShowBtm('DeleOrgan')" :ref="`popover-${row.id}-dele`" width="160" placement="top">
                   <p>确定删除该项吗？</p>
                   <div style="text-align: right; margin: 0">
                     <el-button
@@ -87,7 +87,9 @@
           </el-form-item>
           <el-form-item label="分配部门角色">
             <el-popover :ref="`popover-role`" placement="right">
-              <div style="padding-bottom: 15px;text-align: center;font-size: 18px;font-weight: 900;"><span>分配部门角色</span></div>
+              <div style="padding-bottom: 15px;text-align: center;font-size: 18px;font-weight: 900;">
+                <span>分配部门角色</span>
+              </div>
               <el-card shadow="never">
                 <el-transfer
                   v-model="departmentInfo.roles"
@@ -114,7 +116,9 @@
                   @click="$refs[`popover-role`].doClose();"
                 >确定</el-button>
               </div>
-              <el-button slot="reference">点此分配部门角色</el-button>
+              <el-badge slot="reference" :value="departmentInfo.roles.length">
+                <el-button>点此分配部门角色</el-button>
+              </el-badge>
             </el-popover>
           </el-form-item>
           <el-form-item label="是否启用" prop="status">
@@ -158,6 +162,7 @@
 </template>
 
 <script>
+import { mapGetters } from 'vuex'
 import { getAlldep, appendDepChild, deleDepartment, updateDepInfo } from '@/api/department'
 import { getRoles } from '@/api/role'
 import { deepClone } from '@/utils'
@@ -183,6 +188,8 @@ export default {
       popoverTitle: '',
       tableRow: {},
       dialogOrganVisible: false,
+      RoleEditPMS: [],
+      RoleEditPMSInfo: [],
       realRoleList: [],
       cloneRoleList: [],
       depRoles: [],
@@ -201,6 +208,9 @@ export default {
     }
   },
   computed: {
+    ...mapGetters([
+      'rolesPMS'
+    ]),
     list() {
       const filterName = this.$utils.toString(this.search).trim().toLowerCase()
       if (filterName) {
@@ -213,6 +223,7 @@ export default {
     }
   },
   created() {
+    this.getRoleEditPMS()
     this.getAlldep()
     this.getRoles()
   },
@@ -227,6 +238,24 @@ export default {
       getAlldep().then(res => {
         this.tableData = res.data
       })
+    },
+    getRoleEditPMS() {
+      const routeName = this.$route.name
+      const rolesPMS = this.rolesPMS
+      // eslint-disable-next-line no-unused-vars
+      for (const i of rolesPMS) {
+        if (i.name === routeName) {
+          this.RoleEditPMS = deepClone(i.hasBPMS)
+          this.RoleEditPMSInfo = deepClone(i.realBPMS)
+        }
+      }
+    },
+    isShowBtm(name) {
+      if (this.RoleEditPMS.indexOf(name) > -1) {
+        return true
+      } else {
+        return false
+      }
     },
     closeDialog() {
       this.departmentInfo = Object.assign({}, defaultDpInfo)
