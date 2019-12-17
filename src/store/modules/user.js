@@ -2,13 +2,16 @@ import { login, logout, getInfo, getRouter } from '@/api/user'
 import { getRoleEditPMS } from '@/api/role'
 import { getToken, setToken, removeToken } from '@/utils/auth'
 import { resetRouter } from '@/router'
+import router from '@/router'
+import store from '@/store'
+import { deepClone } from '@/utils'
 
 const state = {
   token: getToken(),
   name: '',
   avatar: '',
   roles: [],
-  router: [],
+  route: [],
   rolesPMS: []
 }
 
@@ -22,8 +25,8 @@ const mutations = {
   SET_AVATAR: (state, avatar) => {
     state.avatar = avatar
   },
-  SET_ROUTERS: (state, router) => {
-    state.router = router
+  SET_ROUTE: (state, route) => {
+    state.route = route
   },
   SET_ROLES: (state, roles) => {
     state.roles = roles
@@ -36,13 +39,23 @@ const mutations = {
 const actions = {
   // user login
   login({ commit }, userInfo) {
-    const { username, password } = userInfo
+    // const { username, password } = userInfo
     return new Promise((resolve, reject) => {
-      login({ username: username.trim(), password: password })
-        .then(response => {
-          const { data } = response
-          commit('SET_TOKEN', data.token)
-          setToken(data.token)
+      login(userInfo)
+        .then(async(response) => {
+          const { token, data, roles, username } = response
+          console.log('登录成功，得到路由')
+          commit('SET_TOKEN', token)
+          commit('SET_ROLES', roles)
+          commit('SET_NAME', username)
+          commit('SET_AVATAR', data.avatar)
+          console.log(data.avatar)
+          commit('SET_ROUTE', data.route)
+          commit('SET_ROLESPMS', data.routesCount)
+          const route = deepClone(data.route)
+          setToken(token)
+          const accessRoutes = await store.dispatch('permission/generateRoutes', route)
+          router.addRoutes(accessRoutes)
           resolve()
         })
         .catch(error => {
@@ -54,27 +67,25 @@ const actions = {
   // get user info
   getInfo({ commit, state }) {
     return new Promise((resolve, reject) => {
-      getInfo(state.token)
-        .then(response => {
-          const { data } = response
-          if (!data) {
-            reject('Verification failed, please Login again.')
-          }
-
-          const { name, avatar } = data
-          const roles = [...data.roles]
-          // roles must be a non-empty array
-          if (!roles || roles.length <= 0) {
-            reject('getInfo: roles must be a non-null array!')
-          }
-          commit('SET_ROLES', roles)
-          commit('SET_NAME', name)
-          commit('SET_AVATAR', avatar)
-          resolve(roles)
-        })
-        .catch(error => {
-          reject(error)
-        })
+      getInfo().then(async response => {
+        const { token, data, roles, username } = response
+        console.log('免登录成功，得到路由')
+        commit('SET_TOKEN', token)
+        commit('SET_ROLES', roles)
+        commit('SET_NAME', username)
+        commit('SET_AVATAR', data.avatar)
+        console.log(data.avatar)
+        commit('SET_ROUTE', data.route)
+        commit('SET_ROLESPMS', data.routesCount)
+        const route = deepClone(data.route)
+        setToken(token)
+        await store.dispatch('permission/generateRoutes', route)
+        // router.addRoutes(accessRoutes)
+        resolve()
+      }).catch(error => {
+        router.push({ path: this.redirect || '/' })
+        reject(error)
+      })
     })
   },
 

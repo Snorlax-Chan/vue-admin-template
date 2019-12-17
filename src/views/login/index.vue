@@ -52,7 +52,7 @@
         </span>
         <el-input
           ref="identify"
-          v-model="identify"
+          v-model="loginForm.identify"
           placeholder="请输入验证码"
           name="identify"
           tabindex="3"
@@ -60,8 +60,7 @@
           @keyup.enter.native="handleLogin"
         />
         <span class="codeType" @click="refreshCode">
-          <s-identify :identify-code="identifyCode" />
-        </span>
+          <el-image ref="image" :src="identifyUrl" style="width:110px;height:40px;" /></span>
       </el-form-item>
 
       <el-button
@@ -81,14 +80,9 @@
 
 <script>
 import { validUsername } from '@/utils/validate'
-import SIdentify from '@/components/Identify'
-import { getIdentify } from '@/api/user'
 
 export default {
   name: 'Login',
-  components: {
-    SIdentify
-  },
   data() {
     const validateUsername = (rule, value, callback) => {
       if (!validUsername(value)) {
@@ -105,16 +99,21 @@ export default {
       }
     }
     const validateIdentify = (rule, value, callback) => {
-      if (this.identify.toLowerCase() !== this.identifyCode.toLowerCase()) {
-        callback(new Error('验证码不正确'))
+      if (value) {
+        if (value.length !== 4) {
+          callback(new Error('验证码格式不正确'))
+        } else {
+          callback()
+        }
       } else {
-        callback()
+        callback(new Error('请输入验证码'))
       }
     }
     return {
       loginForm: {
         username: 'admin',
-        password: '111111'
+        password: '123456',
+        identify: ''
       },
       loginRules: {
         username: [
@@ -130,8 +129,7 @@ export default {
       loading: false,
       passwordType: 'password',
       redirect: undefined,
-      identify: '',
-      identifyCode: ''
+      identifyUrl: ''
     }
   },
   watch: {
@@ -142,10 +140,8 @@ export default {
       immediate: true
     }
   },
-  mounted() {
-    getIdentify().then(res => {
-      this.identifyCode = res.data.identify
-    })
+  created() {
+    this.identifyUrl = 'http://localhost:8080/web/Kaptcha'
   },
   methods: {
     showPwd() {
@@ -180,9 +176,7 @@ export default {
       })
     },
     refreshCode() {
-      getIdentify().then(res => {
-        this.identifyCode = res.data.identify
-      })
+      this.identifyUrl = this.identifyUrl + '?kasjdlk' + Math.random()
     }
   }
 }

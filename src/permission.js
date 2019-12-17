@@ -20,28 +20,30 @@ router.beforeEach(async(to, from, next) => {
 
   // determine whether the user has logged in
   const hasToken = getToken()
-
+  console.log(hasToken)
+  console.log(store.getters.route)
   if (hasToken) {
     if (to.path === '/login') {
-      // console.log('在登录页面，马上要跳转')
+      console.log('在登录页面，马上要跳转')
       // if is logged in, redirect to the home page
       next({ path: '/' })
       NProgress.done()
     } else {
       // determine whether the user has obtained his permission roles through getInfo
-      const hasRouter = store.getters.router && store.getters.router.length > 0
-      if (hasRouter) {
+      const hasRoute = store.getters.route && store.getters.route.length > 0
+      console.log(hasRoute)
+      if (hasRoute) {
         next()
       } else {
         try {
           // get user info
           // note: roles must be a object array! such as: ['admin'] or ,['developer','editor']
-          // console.log('异步取路由信息开始')
-          const roles = await store.dispatch('user/getInfo')
-          await store.dispatch('user/getRolesPMS', roles)
-          const routers = await store.dispatch('user/getRouter', roles)
+          console.log('异步取路由信息开始')
+          await store.dispatch('user/getInfo')
+          // await store.dispatch('user/getRolesPMS', roles)
+          // const routers = await store.dispatch('user/getRouter', roles)
           // generate accessible routes map based on roles
-          const accessRoutes = await store.dispatch('permission/generateRoutes', routers)
+          const accessRoutes = store.getters.permission_routes
 
           // dynamically add accessible routes
           router.addRoutes(accessRoutes)

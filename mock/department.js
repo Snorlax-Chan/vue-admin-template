@@ -97,7 +97,6 @@ function searchUserInfo(filterName) {
 function filter(property, filterName) {
   if (filterName) {
     const searchProps = [property]
-    console.log(searchProps)
     const rest = AllDepUsers.filter(item => searchProps.some(key => XEUtils.toString(item[key]).toLowerCase().indexOf(filterName) > -1))
     return rest
   }
@@ -137,20 +136,15 @@ export default [
     response: res => {
       let data = []
       const { tableType, stringInfo, property, order, filterName, pageSize, currentPage } = res.body
-      console.log(tableType, stringInfo, property, order, filterName, pageSize, currentPage)
       if (tableType === 'all') {
-        console.log('---all------')
         tableData = deepClone(AllDepUsers)
         data = mockUserInfo(pageSize, currentPage)
       } else if (tableType === 'search') {
-        console.log('---search------')
         tableData = searchUserInfo(stringInfo)
         data = mockUserInfo(pageSize, currentPage)
       } else if (tableType === 'sort') {
         if (property === 'name') {
-          console.log('---property------')
           sortByName(order)
-          console.log('---order---')
           data = mockUserInfo(pageSize, currentPage)
         } else if (property === 'content') {
           sortByContent(order)
@@ -271,9 +265,6 @@ export default [
     url: '/department/fileUpdate',
     type: 'post',
     response: res => {
-      const param = res.body
-      console.log(res)
-      console.log(param)
       return {
         code: 20000,
         data: 'success'

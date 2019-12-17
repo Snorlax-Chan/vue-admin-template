@@ -96,7 +96,7 @@ const roleEditPMS = [
       name: 'Role',
       title: '角色权限',
       checkAll: true,
-      hasBPMS: ['NewRole', 'EditRole', 'DeleRole', 'AdminPMS', 'NewPage', 'EditPage', 'SetButtom', 'DelePage', 'NewChildPage', 'NewButtom', 'EditButtom', 'DeleButtom', 'SubmitRoute'],
+      hasBPMS: ['NewRole', 'EditRole', 'DeleRole', 'AdminPMS', 'NewPage', 'EditPage', 'SetButtom', 'DelePage', 'NewChildPage', 'NewButtom', 'EditButtom', 'DeleButtom', 'SubmitRoute', 'EditChildPage', 'DeleChildPage'],
       realBPMS: [{
         name: 'NewRole',
         title: '新建角色',
