@@ -5,6 +5,7 @@ import { resetRouter } from '@/router'
 import router from '@/router'
 import store from '@/store'
 import { deepClone } from '@/utils'
+import { assRoute, assAttribute } from '@/utils/route'
 
 const state = {
   token: getToken(),
@@ -43,18 +44,21 @@ const actions = {
     return new Promise((resolve, reject) => {
       login(userInfo)
         .then(async(response) => {
-          const { token, data, roles, username } = response
-          console.log('登录成功，得到路由')
+          const { token, data } = response
           commit('SET_TOKEN', token)
-          commit('SET_ROLES', roles)
-          commit('SET_NAME', username)
-          commit('SET_AVATAR', data.avatar)
-          console.log(data.avatar)
-          commit('SET_ROUTE', data.route)
-          commit('SET_ROLESPMS', data.routesCount)
-          const route = deepClone(data.route)
+          // commit('SET_ROLES', roles)
+          commit('SET_NAME', data.f_pu_name)
+          commit('SET_AVATAR', data.f_pu_avatar)
+          const list = deepClone(data.routeList)
+          const routeList = assRoute(list)
+          // console.log(data.attributeList)
+          const attList = deepClone(data.attributeList)
+          const attributeList = assAttribute(list, attList)
+          commit('SET_ROUTE', routeList)
+          commit('SET_ROLESPMS', attributeList)
+          // const route = deepClone(data.route)
           setToken(token)
-          const accessRoutes = await store.dispatch('permission/generateRoutes', route)
+          const accessRoutes = await store.dispatch('permission/generateRoutes', routeList)
           router.addRoutes(accessRoutes)
           resolve()
         })
@@ -68,18 +72,20 @@ const actions = {
   getInfo({ commit, state }) {
     return new Promise((resolve, reject) => {
       getInfo().then(async response => {
-        const { token, data, roles, username } = response
-        console.log('免登录成功，得到路由')
+        const { token, data } = response
         commit('SET_TOKEN', token)
-        commit('SET_ROLES', roles)
-        commit('SET_NAME', username)
-        commit('SET_AVATAR', data.avatar)
-        console.log(data.avatar)
-        commit('SET_ROUTE', data.route)
-        commit('SET_ROLESPMS', data.routesCount)
-        const route = deepClone(data.route)
+        // commit('SET_ROLES', roles)
+        commit('SET_NAME', data.f_pu_name)
+        commit('SET_AVATAR', data.f_pu_avatar)
+        const list = deepClone(data.routeList)
+        const routeList = assRoute(list)
+        const attList = deepClone(data.attributeList)
+        const attributeList = assAttribute(list, attList)
+        commit('SET_ROUTE', routeList)
+        commit('SET_ROLESPMS', attributeList)
+        // const route = deepClone(data.route)
         setToken(token)
-        await store.dispatch('permission/generateRoutes', route)
+        await store.dispatch('permission/generateRoutes', routeList)
         // router.addRoutes(accessRoutes)
         resolve()
       }).catch(error => {
@@ -121,10 +127,10 @@ const actions = {
   // user logout
   logout({ commit, state }) {
     return new Promise((resolve, reject) => {
-      logout(state.token)
+      logout()
         .then(() => {
           commit('SET_TOKEN', '')
-          commit('SET_ROUTERS', [])
+          commit('SET_ROUTE', [])
           removeToken()
           resetRouter()
           resolve()

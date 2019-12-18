@@ -162,7 +162,7 @@ export default {
           this.$store
             .dispatch('user/login', this.loginForm)
             .then(() => {
-              // console.log('登录成功')
+              console.log('登录成功')
               this.$router.push({ path: this.redirect || '/' })
               this.loading = false
             })
