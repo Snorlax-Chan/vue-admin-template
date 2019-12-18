@@ -18,7 +18,7 @@
         </span>
         <el-input
           ref="username"
-          v-model="loginForm.username"
+          v-model="loginForm.f_pu_name"
           placeholder="请输入用户名"
           name="username"
           type="text"
@@ -34,7 +34,7 @@
         <el-input
           :key="passwordType"
           ref="password"
-          v-model="loginForm.password"
+          v-model="loginForm.f_pu_pwd"
           :type="passwordType"
           placeholder="请输入密码"
           name="password"
@@ -52,7 +52,7 @@
         </span>
         <el-input
           ref="identify"
-          v-model="loginForm.identify"
+          v-model="loginForm.code"
           placeholder="请输入验证码"
           name="identify"
           tabindex="3"
@@ -111,18 +111,18 @@ export default {
     }
     return {
       loginForm: {
-        username: 'admin',
-        password: '123456',
-        identify: ''
+        f_pu_name: 'admin',
+        f_pu_pwd: '123456',
+        code: ''
       },
       loginRules: {
-        username: [
+        f_pu_name: [
           { required: true, trigger: 'blur', validator: validateUsername }
         ],
-        password: [
+        f_pu_pwd: [
           { required: true, trigger: 'blur', validator: validatePassword }
         ],
-        identify: [
+        code: [
           { required: true, trigger: 'blur', validator: validateIdentify }
         ]
       },
